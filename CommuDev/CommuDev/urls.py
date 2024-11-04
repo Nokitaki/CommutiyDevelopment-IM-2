@@ -21,4 +21,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('news/', include('newsfeed.urls')),  # Replace 'yourappname' with the actual app name
+    path('resource/', include('resourcehub.urls')),
 ]
