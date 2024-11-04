@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'newsfeed',
     'rewards',
+    'resourcehub',
 ]
 
 MIDDLEWARE = [
@@ -120,6 +121,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "newsfeed/static",  # Add your app's static directory
+    BASE_DIR / "resourcehub/static"
 ]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
