@@ -22,4 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('news/', include('newsfeed.urls')),  # Replace 'yourappname' with the actual app name
     path('resource/', include('resourcehub.urls')),
+    path("feedback/", include("feedback.urls")),
+    path("rewards/", include("rewards.urls")),
 ]
