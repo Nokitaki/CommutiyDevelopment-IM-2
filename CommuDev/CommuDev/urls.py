@@ -26,4 +26,5 @@ urlpatterns = [
     path("rewards/", include("rewards.urls")),
     path('users/', include('users.urls')),  
     path('tasks/', include('taskManager.urls')), 
+    path('leaderboard/', include('leaderboard.urls')),
 ]
