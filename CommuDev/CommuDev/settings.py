@@ -41,6 +41,9 @@ INSTALLED_APPS = [
     'resourcehub',
     'feedback',
     'rewards',
+    'users',  
+    'taskManager',
+    
 
 ]
 
