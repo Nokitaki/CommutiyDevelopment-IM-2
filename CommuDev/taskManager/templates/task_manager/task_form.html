@@ -23,14 +23,19 @@
                 </p>
             </div>
 
+            <!-- Alert Message -->
+            <div id="alertMessage" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mx-8 mt-6" role="alert">
+                <span class="block sm:inline">Please fill in all required fields</span>
+            </div>
+
             <!-- Form Section -->
-            <form method="post" class="px-8 py-6 space-y-6">
+            <form method="post" class="px-8 py-6 space-y-6" id="taskForm">
                 {% csrf_token %}
                 
                 <!-- Task Description -->
                 <div class="form-group">
                     <label for="{{ form.task_description.id_for_label }}" class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
-                        Task Description
+                        Task Description <span class="text-red-500">*</span>
                     </label>
                     <div class="mt-1">
                         {{ form.task_description }}
@@ -44,7 +49,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="form-group">
                         <label for="{{ form.status.id_for_label }}" class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
-                            Status
+                            Status <span class="text-red-500">*</span>
                         </label>
                         <div class="mt-1">
                             {{ form.status }}
@@ -52,7 +57,7 @@
                     </div>
                     <div class="form-group">
                         <label for="{{ form.priority.id_for_label }}" class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
-                            Priority
+                            Priority <span class="text-red-500">*</span>
                         </label>
                         <div class="mt-1">
                             {{ form.priority }}
@@ -64,7 +69,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="form-group">
                         <label for="{{ form.due_date.id_for_label }}" class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
-                            Due Date
+                            Due Date <span class="text-red-500">*</span>
                         </label>
                         <div class="mt-1">
                             {{ form.due_date }}
@@ -72,7 +77,7 @@
                     </div>
                     <div class="form-group">
                         <label for="{{ form.task_type.id_for_label }}" class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
-                            Task Type
+                            Task Type <span class="text-red-500">*</span>
                         </label>
                         <div class="mt-1">
                             {{ form.task_type }}
@@ -104,7 +109,9 @@
                         </a>
                         <button 
                             type="submit" 
-                            class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 ease-in-out transform hover:-translate-y-0.5 hover:shadow-lg"
+                            id="submitButton"
+                            disabled
+                            class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 ease-in-out transform hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {% if object %}
                                 <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,4 +131,32 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('taskForm');
+    const submitButton = document.getElementById('submitButton');
+    const inputs = form.querySelectorAll('input, select, textarea');
+
+    function checkFormValidity() {
+        let isValid = true;
+        inputs.forEach(input => {
+            if (input.name !== 'csrfmiddlewaretoken' && input.required && !input.value.trim()) {
+                isValid = false;
+            }
+        });
+        
+        submitButton.disabled = !isValid;
+    }
+
+    // Check form validity on any input change
+    inputs.forEach(input => {
+        input.addEventListener('input', checkFormValidity);
+        input.addEventListener('change', checkFormValidity);
+    });
+
+    // Initial check when page loads
+    checkFormValidity();
+});
+</script>
 {% endblock %}
