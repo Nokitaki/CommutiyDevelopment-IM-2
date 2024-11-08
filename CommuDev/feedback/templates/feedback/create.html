@@ -12,23 +12,58 @@
                     <h4 class="card-title mb-0">Create Feedback</h4>
                 </div>
                 <div class="card-body">
-                    <form method="post">
+                    <form method="post" id="feedbackForm">
                         {% csrf_token %}
                         {% for field in form %}
                             <div class="mb-3">
                                 <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
                                 {{ field.errors }}
-                                {{ field|add_class:"form-control" }}
+                                {{ field|add_class:"form-control required-field" }}
                                 {% if field.help_text %}
                                     <div class="form-text">{{ field.help_text }}</div>
                                 {% endif %}
                             </div>
                         {% endfor %}
-                        <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                        <button type="submit" id="submitButton" class="btn btn-primary mt-3" disabled>Submit</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('feedbackForm');
+    const submitButton = document.getElementById('submitButton');
+    const requiredFields = form.getElementsByClassName('required-field');
+
+    function validateForm() {
+        let isValid = true;
+        
+        for (let field of requiredFields) {
+            if (!field.value.trim()) {
+                isValid = false;
+                break;
+            }
+        }
+
+        submitButton.disabled = !isValid;
+    }
+
+    for (let field of requiredFields) {
+        field.addEventListener('input', validateForm);
+        field.addEventListener('change', validateForm);
+    }
+
+    validateForm();
+});
+</script>
 {% endblock %}
