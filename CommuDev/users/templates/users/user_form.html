@@ -8,11 +8,15 @@
         <h2>{{ title }}</h2>
     </div>
     <div class="card-body">
-        <form method="post">
+        <form method="post" id="userForm">
             {% csrf_token %}
             {% for field in form %}
             <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <label for="{{ field.id_for_label }}">{{ field.label }}
+                    {% if field.field.required %}
+                    <span style="color: #dc3545;">*</span>
+                    {% endif %}
+                </label>
                 {{ field }}
                 {% if field.errors %}
                 <div class="error">{{ field.errors.0 }}</div>
@@ -21,9 +25,46 @@
             {% endfor %}
             <div class="button-container">
                 <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary">{{ submit_text }}</button>
+                <button type="submit" class="btn btn-primary" id="submitButton" disabled>{{ submit_text }}</button>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+    .btn-primary:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+        background-color: #007bff;
+        color: white;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('userForm');
+    const submitButton = document.getElementById('submitButton');
+    const inputs = form.querySelectorAll('input, select, textarea');
+
+    function checkFormValidity() {
+        let isValid = true;
+        inputs.forEach(input => {
+            if (input.name !== 'csrfmiddlewaretoken' && input.required && !input.value.trim()) {
+                isValid = false;
+            }
+        });
+        
+        submitButton.disabled = !isValid;
+    }
+
+    // Check form validity on any input change
+    inputs.forEach(input => {
+        input.addEventListener('input', checkFormValidity);
+        input.addEventListener('change', checkFormValidity);
+    });
+
+    // Initial check when page loads
+    checkFormValidity();
+});
+</script>
 {% endblock %}
