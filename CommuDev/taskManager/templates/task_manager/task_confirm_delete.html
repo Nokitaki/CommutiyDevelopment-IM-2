@@ -1,0 +1,22 @@
+{% extends 'c_base.html' %}
+
+{% block content %}
+  <div class="container mx-auto p-4">
+    <h1 class="text-4xl mb-4">Delete Task</h1>
+
+    <div class="bg-white rounded-lg shadow-md p-4">
+      <p class="mb-4">Are you sure you want to delete the task: "{{ task.task_description }}"?</p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="flex justify-end">
+          <a href="{% url 'task_list' %}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2">
+            Cancel
+          </a>
+          <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+            Delete
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

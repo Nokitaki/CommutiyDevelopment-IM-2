@@ -1,10 +1,13 @@
 CommuDev/CommuDev/__pycache__
 CommuDev/CommuDev/__pycache__/settings.cpython-312.pyc
 
+<<<<<<< HEAD
 CommuDev/CommuDev/__pycache__/settings.cpython-312.pyc
 CommuDev/CommuDev/__pycache__/settings.cpython-312.pyc
 CommuDev/CommuDev/__pycache__/settings.cpython-312.pyc
 CommuDev/CommuDev/__pycache__/urls.cpython-312.pyc
 CommuDev/CommuDev/__pycache__/urls.cpython-312.pyc
 CommuDev/CommuDev/__pycache__/settings.cpython-312.pyc
+=======
+>>>>>>> origin/stephen-branch
 *.pyc
