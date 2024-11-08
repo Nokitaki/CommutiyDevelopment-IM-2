@@ -7,6 +7,13 @@
     <title>News Feed</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'newsfeed/css/newsfeed_home.css' %}">
+    <style>
+        .btn-primary:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -33,12 +40,12 @@
     <main class="container">
         <section class="create-post-section">
             <h1><i class="fas fa-pen"></i> Create a New Post</h1>
-            <form method="POST" class="create-post-form">
+            <form method="POST" class="create-post-form" id="createPostForm">
                 {% csrf_token %}
                 <div class="form-group">
                     {{ form.as_p }}
                 </div>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary" id="submitButton" disabled>
                     <i class="fas fa-plus"></i> Create Post
                 </button>
             </form>
@@ -97,5 +104,40 @@
             </div>
         </section>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('createPostForm');
+            const submitButton = document.getElementById('submitButton');
+            const formInputs = form.querySelectorAll('input[type="text"], textarea, select');
+
+            function validateForm() {
+                let isValid = true;
+                formInputs.forEach(input => {
+                    if (!input.value.trim()) {
+                        isValid = false;
+                    }
+                });
+                submitButton.disabled = !isValid;
+            }
+
+            // Add event listeners to all form inputs
+            formInputs.forEach(input => {
+                input.addEventListener('input', validateForm);
+                input.addEventListener('change', validateForm);
+            });
+
+            // Initial validation check
+            validateForm();
+
+            // Optional: Add form submission handler
+            form.addEventListener('submit', function(event) {
+                if (!Array.from(formInputs).every(input => input.value.trim())) {
+                    event.preventDefault();
+                    alert('Please fill in all fields before submitting.');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

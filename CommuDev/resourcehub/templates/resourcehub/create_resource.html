@@ -29,6 +29,18 @@
             margin: 0 auto;
         }
 
+        form p {
+            margin: 0;
+            padding: 0;
+            margin-bottom: 15px;
+        }
+
+        form ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
         label {
             font-weight: bold;
             margin-bottom: 5px;
@@ -36,7 +48,10 @@
             color: #34495e;
         }
 
-        input[type="text"], input[type="email"], select, textarea {
+        input[type="text"], 
+        input[type="email"], 
+        select, 
+        textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid #dcdcdc;
@@ -44,13 +59,14 @@
             margin-bottom: 15px;
             box-sizing: border-box;
             font-size: 1em;
+            transition: border-color 0.3s ease;
         }
 
-        .error-message {
-            color: #e74c3c; /* Red color for error messages */
-            font-size: 0.9em; /* Slightly smaller font size */
-            margin-top: -10px; /* Adjust spacing above the message */
-            margin-bottom: 15px; /* Space below the message */
+        input:focus, 
+        select:focus, 
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
         }
 
         button {
@@ -65,8 +81,14 @@
             width: 100%;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             background-color: #2980b9;
+        }
+
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            opacity: 0.7;
         }
 
         .footer {
@@ -79,15 +101,57 @@
 </head>
 <body>
     <h1>Add a New Resource</h1>
-    <form method="POST">
+    <form method="POST" id="resourceForm">
         {% csrf_token %}
         {{ form.as_p }}
-        {% if form.some_field.errors %}
-        {% endif %}
-        <button type="submit">Add Resource</button>
+        <button type="submit" id="submitButton" disabled>Add Resource</button>
     </form>
     <div class="footer">
         &copy; 2024 Your Company Name. All rights reserved.
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('resourceForm');
+            const submitButton = document.getElementById('submitButton');
+            const formInputs = form.querySelectorAll('input[type="text"], input[type="email"], textarea, select');
+
+            // Remove any Django-generated error messages
+            document.querySelectorAll('ul.errorlist').forEach(errorList => {
+                errorList.remove();
+            });
+
+            function validateInput(input) {
+                return input.value.trim() !== '';
+            }
+
+            function validateForm() {
+                let isValid = true;
+                formInputs.forEach(input => {
+                    if (!validateInput(input)) {
+                        isValid = false;
+                    }
+                });
+                submitButton.disabled = !isValid;
+                return isValid;
+            }
+
+            // Add event listeners to all form inputs
+            formInputs.forEach(input => {
+                input.addEventListener('input', validateForm);
+                input.addEventListener('blur', validateForm);
+            });
+
+            // Initial form validation
+            validateForm();
+
+            // Form submission handler
+            form.addEventListener('submit', function(event) {
+                if (!validateForm()) {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
