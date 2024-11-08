@@ -1,8 +1,7 @@
-# users/views.py
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 from .models import User
 from .forms import UserForm
 
@@ -28,10 +27,17 @@ def user_list(request):
 def user_create(request):
     if request.method == 'POST':
         form = UserForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'User created successfully!')
-            return redirect('user_list')
+        try:
+            if form.is_valid():
+                user = form.save(commit=False)
+                user.clean()  # Run model validation
+                user.save()
+                messages.success(request, 'User created successfully!')
+                return redirect('user_list')
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        except ValidationError as e:
+            messages.error(request, str(e))
     else:
         form = UserForm()
     
@@ -46,10 +52,17 @@ def user_update(request, pk):
     
     if request.method == 'POST':
         form = UserForm(request.POST, instance=user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'User updated successfully!')
-            return redirect('user_list')
+        try:
+            if form.is_valid():
+                user = form.save(commit=False)
+                user.clean()  # Run model validation
+                user.save()
+                messages.success(request, 'User updated successfully!')
+                return redirect('user_list')
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        except ValidationError as e:
+            messages.error(request, str(e))
     else:
         form = UserForm(instance=user)
     
@@ -64,9 +77,13 @@ def user_delete(request, pk):
     user = get_object_or_404(User, userId=pk)
     
     if request.method == 'POST':
-        user.delete()
-        messages.success(request, 'User deleted successfully!')
-        return redirect('user_list')
+        try:
+            user.delete()
+            messages.success(request, 'User deleted successfully!')
+            return redirect('user_list')
+        except Exception as e:
+            messages.error(request, f'Error deleting user: {str(e)}')
+            return redirect('user_list')
     
     return render(request, 'users/user_confirm_delete.html', {
         'user': user
@@ -75,5 +92,6 @@ def user_delete(request, pk):
 def user_profile(request, pk):
     user = get_object_or_404(User, pk=pk)
     return render(request, 'users/user_profile.html', {'user': user})
+
 def index(request):
-    return render(request, 'users/index.html') 
+    return render(request, 'users/index.html')
