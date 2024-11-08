@@ -37,7 +37,7 @@ def user_create(request):
     
     return render(request, 'users/user_form.html', {
         'form': form,
-        'title': 'Addsss User',
+        'title': 'Add User',
         'submit_text': 'Create User'
     })
 
