@@ -48,7 +48,7 @@
                     <i class="fas fa-medal"></i>
                     <span>Leaderboard</span>
                 </a>
-                <a href="#" class="nav-item {% if active_tab == 'feedback' %}active{% endif %}">
+                <a href="{% url 'feedback-list' %}" class="nav-item {% if active_tab == 'feedback' %}active{% endif %}">
                     <i class="fas fa-comment-dots"></i>
                     <span>Feedback</span>
                 </a>
