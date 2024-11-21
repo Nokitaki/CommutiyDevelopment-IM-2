@@ -1,4 +1,4 @@
-/* Modern CSS Reset and Variables */
+/* newsfeed_home.css*/
 :root {
     --primary: #3b82f6;
     --primary-hover: #2563eb;
@@ -35,6 +35,7 @@ body {
 
 /* Navbar Styles */
 .navbar {
+    margin: 0;  /* Remove margin */
     background-color: var(--surface);
     box-shadow: var(--shadow-sm);
     position: sticky;
@@ -45,11 +46,11 @@ body {
 
 .navbar-container {
     max-width: 1200px;
-    margin: 0 auto;
-    padding: 1rem 2rem;
+    margin: 0; /* Remove auto margin */
+    padding: 0.5rem; /* Reduce padding */
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 1rem;
 }
 
 .nav-item {
@@ -111,9 +112,16 @@ body {
 /* Main Container */
 .container {
     max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 2rem;
+    margin: 2rem 0; /* Remove auto margin, keep vertical spacing */
+    padding: 0 1rem; /* Reduce padding */
 }
+
+@media (max-width: 768px) {
+    .navbar-container {
+        padding: 0.5rem; /* Consistent padding */
+    }
+}
+
 
 /* Create Post Section */
 .create-post-section {

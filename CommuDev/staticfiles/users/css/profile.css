@@ -1,0 +1,50 @@
+/* users/static/users/css/profile.css */
+.profile-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.profile-info p {
+    margin: 1rem 0;
+    font-size: 1.1rem;
+}
+
+.profile-info strong {
+    display: inline-block;
+    width: 150px;
+    color: #666;
+}
+
+.profile-actions {
+    text-align: center;
+}
+
+.edit-button {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    background-color: #1a73e8;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.edit-button:hover {
+    background-color: #1557b0;
+}

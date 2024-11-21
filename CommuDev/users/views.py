@@ -22,10 +22,16 @@ def user_login(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('home')
+        try:
+            # Find user by username first
+            user = User.objects.get(username=username)
+            # Then authenticate
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('home')
+        except User.DoesNotExist:
+            pass
         messages.error(request, 'Invalid username or password.')
     return render(request, 'users/login.html')
 
