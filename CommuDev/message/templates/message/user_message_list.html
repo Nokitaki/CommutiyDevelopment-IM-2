@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Messages</h2>
+    <a href="{% url 'user_message_create' %}" class="btn btn-primary mb-3">New Message</a>
+    
+    <div class="list-group">
+        {% if user_messages %}
+            {% for user_message in user_messages %}
+                <div class="list-group-item">
+                    <h5>{{ user_message.subject }}</h5>
+                    <small>Created: {{ user_message.created_at }}</small>
+                    
+                    <div class="messages mt-3">
+                        {% for message in user_message.messages.all %}
+                            <div class="message">
+                                <p>{{ message.content }}</p>
+                                <small>{{ message.sent_at }}</small>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted">No messages yet</p>
+                        {% endfor %}
+                    </div>
+                    
+                    <a href="{% url 'message_create' user_message.id %}" class="btn btn-sm btn-primary mt-2">Reply</a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info">
+                No messages found. Create a new message to get started!
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
