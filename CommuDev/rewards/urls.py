@@ -1,11 +1,9 @@
 from django.urls import path
-
-import rewards.views as views
-
+from . import views
 
 urlpatterns = [
-    path('', views.RewardListView.as_view(), name='reward-list'),
-    path('create/', views.RewardCreateView.as_view(), name='reward-create'),
-    path('edit/<int:pk>/', views.RewardUpdateView.as_view(), name='reward-edit'),
-    path('delete/<int:pk>/', views.RewardDeleteView.as_view(), name='reward-delete'),
+    path('', views.reward_list, name='reward-list'),
+    path('create/', views.reward_create, name='reward-create'),
+    path('edit/<int:pk>/', views.reward_update, name='reward-edit'),
+    path('delete/<int:pk>/', views.reward_delete, name='reward-delete'),
 ]

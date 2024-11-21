@@ -1,9 +1,22 @@
+# rewards/forms.py
 from django import forms
-
-from rewards.models import Reward
-
+from .models import Reward
 
 class RewardForm(forms.ModelForm):
-    class Meta:
-        model = Reward
-        fields = ['value', 'quantity', 'name']  # Adjust fields according to your model
+   class Meta:
+       model = Reward
+       exclude = ['user','creator']
+       widgets = {
+           'name': forms.TextInput(attrs={
+               'class': 'form-control',
+               'placeholder': 'Enter reward name'
+           }),
+           'value': forms.NumberInput(attrs={
+               'class': 'form-control',
+               'placeholder': 'Enter reward value' 
+           }),
+           'quantity': forms.NumberInput(attrs={
+               'class': 'form-control',
+               'placeholder': 'Enter quantity'
+           })
+       }

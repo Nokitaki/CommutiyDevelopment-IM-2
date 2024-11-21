@@ -36,15 +36,15 @@
                     <span>Messages</span>
                     <span class="badge">3</span>
                 </a>
-                <a href="#" class="nav-item {% if active_tab == 'tasks' %}active{% endif %}">
+                <a href="{% url 'task_list' %}" class="nav-item {% if active_tab == 'tasks' %}active{% endif %}">
                     <i class="fas fa-tasks"></i>
                     <span>Tasks</span>
                 </a>
-                <a href="#" class="nav-item {% if active_tab == 'rewards' %}active{% endif %}">
+                <a href="{% url 'reward-list' %}" class="nav-item {% if active_tab == 'rewards' %}active{% endif %}">
                     <i class="fas fa-trophy"></i>
                     <span>Rewards</span>
                 </a>
-                <a href="#" class="nav-item {% if active_tab == 'leaderboard' %}active{% endif %}">
+                <a href="{% url 'leaderboard' %}" class="nav-item {% if active_tab == 'leaderboard' %}active{% endif %}">
                     <i class="fas fa-medal"></i>
                     <span>Leaderboard</span>
                 </a>
