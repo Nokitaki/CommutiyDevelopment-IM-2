@@ -27,4 +27,5 @@ urlpatterns = [
     path('users/', include('users.urls')),  
     path('tasks/', include('taskManager.urls')), 
     path('leaderboard/', include('leaderboard.urls')),
+    path('messaging/', include('leaderboard.urls')),
 ]
