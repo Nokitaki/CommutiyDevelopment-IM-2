@@ -1,10 +1,11 @@
+# newsfeed/urls.py
 from django.urls import path
-from .views import home, create_post, like_post, update_post, delete_post
+from . import views
 
 urlpatterns = [
-    path('', home, name='home'),  # Home page showing posts
-    path('create/', create_post, name='create_post'),  # Create a new post
-    path('like/<int:post_id>/', like_post, name='like_post'),  # Like a specific post
-    path('update/<int:id>/', update_post, name='update_post'),  # Update an existing post
-    path('delete/<int:id>/', delete_post, name='delete_post'),  # Delete a post
+    path('', views.home, name='home'),
+    path('create/', views.create_post, name='create_post'),
+    path('like/<int:feed_id>/', views.like_post, name='like_post'),
+    path('update/<int:feed_id>/', views.update_post, name='update_post'),
+    path('delete/<int:feed_id>/', views.delete_post, name='delete_post'),
 ]

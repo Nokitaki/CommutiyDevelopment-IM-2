@@ -68,6 +68,10 @@
                         <div class="resource-header">
                             <h3>{{ resource.resource_title }}</h3>
                             <div class="resource-meta">
+                                <span class="resource-creator">
+                                    <i class="fas fa-user"></i>
+                                    {{ resource.created_by.firstname }} {{ resource.created_by.lastname }}
+                                </span>
                                 <span class="resource-date">
                                     <i class="fas fa-calendar"></i>
                                     {{ resource.upload_date|date:"F j, Y" }}

@@ -1,0 +1,27 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link href="{% static 'users/css/profile.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <h2>{{ user.firstname }} {{ user.lastname }}'s Profile</h2>
+    </div>
+    <div class="profile-content">
+        <div class="profile-info">
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Name:</strong> {{ user.firstname }} {{ user.middleinit }} {{ user.lastname }}</p>
+            <p><strong>Age:</strong> {{ user.age }}</p>
+            <p><strong>State:</strong> {{ user.state }}</p>
+            <p><strong>Employment Status:</strong> {{ user.employmentStatus }}</p>
+            <p><strong>Points:</strong> {{ user.points }}</p>
+        </div>
+        <div class="profile-actions">
+            <a href="{% url 'edit_profile' %}" class="edit-button">Edit Profile</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

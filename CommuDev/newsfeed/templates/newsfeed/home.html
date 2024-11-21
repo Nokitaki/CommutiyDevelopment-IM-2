@@ -30,10 +30,32 @@
                 <i class="fas fa-newspaper"></i>
                 <span>Resource Hub</span>
             </a>
-            <a href="#" class="nav-item">  
+            <button onclick="showLogoutConfirm()" class="nav-item" style="border: none; background: none;">
                 <i class="fas fa-user-circle"></i>
                 <span>Logout</span>
-            </a>
+            </button>
+            
+            <div id="logoutModal" style="display: none;" class="modal">
+                <div class="modal-content">
+                    <h3>Confirm Logout</h3>
+                    <p>Are you sure you want to logout?</p>
+                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit">Yes, Logout</button>
+                        <button type="button" onclick="hideLogoutConfirm()">Cancel</button>
+                    </form>
+                </div>
+            </div>
+            
+            <script>
+            function showLogoutConfirm() {
+                document.getElementById('logoutModal').style.display = 'block';
+            }
+            
+            function hideLogoutConfirm() {
+                document.getElementById('logoutModal').style.display = 'none';
+            }
+            </script>
         </div>
     </nav>
 
@@ -77,22 +99,21 @@
                     </div>
 
                     <div class="post-actions">
-                        <form action="{% url 'like_post' post.id %}" method="POST" class="action-form">
+                        <form action="{% url 'like_post' post.feed_id %}" method="POST" class="action-form">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-like">
                                 <i class="fas fa-heart"></i> Like
                             </button>
                         </form>
                         
-                        <form action="{% url 'update_post' post.id %}" method="GET" class="action-form">
+                        <form action="{% url 'update_post' post.feed_id %}" method="GET" class="action-form">
                             <button type="submit" class="btn btn-update">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
                         </form>
                         
-                        <form action="{% url 'delete_post' post.id %}" method="POST" class="action-form">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this post?');">
+                        <form action="{% url 'delete_post' post.feed_id %}" method="GET" class="action-form">
+                            <button type="submit" class="btn btn-delete">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
                         </form>

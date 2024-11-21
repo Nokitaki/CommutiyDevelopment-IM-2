@@ -47,6 +47,8 @@ INSTALLED_APPS = [
 
 ]
 
+AUTH_USER_MODEL = 'users.User'
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -132,3 +134,7 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGIN_URL = 'login'  # URL name where users will be redirected if login is required
+LOGIN_REDIRECT_URL = '/news/'  # Where to redirect after successful login
+LOGOUT_REDIRECT_URL = 'login'  # Where to redirect after logout

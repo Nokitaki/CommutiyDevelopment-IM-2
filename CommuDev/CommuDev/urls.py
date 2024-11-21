@@ -17,14 +17,16 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('news/', include('newsfeed.urls')),  # Replace 'yourappname' with the actual app name
-    path('resource/', include('resourcehub.urls')),
-    path("feedback/", include("feedback.urls")),
-    path("rewards/", include("rewards.urls")),
-    path('users/', include('users.urls')),  
-    path('tasks/', include('taskManager.urls')), 
-    path('leaderboard/', include('leaderboard.urls')),
+   path('', RedirectView.as_view(url='users/login/', permanent=False)),
+   path('admin/', admin.site.urls),
+   path('news/', include('newsfeed.urls')), 
+   path('resource/', include('resourcehub.urls')),
+   path("feedback/", include("feedback.urls")),
+   path("rewards/", include("rewards.urls")),
+   path('users/', include('users.urls')),  # Changed from /login to users/
+   path('tasks/', include('taskManager.urls')), 
+   path('leaderboard/', include('leaderboard.urls')),
 ]

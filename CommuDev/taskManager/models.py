@@ -24,7 +24,7 @@ class Task(models.Model):
     reward = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)  
     updated_at = models.DateTimeField(auto_now=True) 
-    assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True) 
+ #   assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True) 
     completed_date = models.DateField(null=True, blank=True)  
 
     def __str__(self):
