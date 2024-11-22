@@ -53,4 +53,10 @@ def edit_profile(request):
             return redirect('profile')
     else:
         form = UserRegistrationForm(instance=request.user)
-    return render(request, 'users/edit_profile.html', {'form': form})
+    
+    context = {
+        'form': form,
+        'title': 'Edit Profile', 
+        'submit_text': 'Save Changes'  
+    }
+    return render(request, 'users/user_form.html', context)
