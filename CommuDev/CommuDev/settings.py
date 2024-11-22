@@ -133,6 +133,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "newsfeed/static",  # Add your app's static directory
     BASE_DIR / "resourcehub/static",
+    BASE_DIR / "chat/static",
    
 ]
 

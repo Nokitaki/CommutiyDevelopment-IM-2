@@ -1,14 +1,122 @@
-<h2>Message History</h2>
-<ul>
-    {% for message in messages %}
-        <li>
-            <strong>From:</strong> {{ message.sender }} 
-            <strong>To:</strong> {{ message.recipient }} 
-            <strong>Message:</strong> {{ message.content }} 
-            <strong>Sent:</strong> {{ message.timestamp }}
-            <a href="{% url 'edit_message' message.pk %}">Edit</a>
-            <a href="{% url 'delete_message' message.pk %}">Delete</a>
-        </li>
-    {% endfor %}
-</ul>
-<a href="{% url 'send_message' %}">Send a New Message</a>
+<!--chat/templates/chat/message_list.html-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .message-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+        .message-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .message-item {
+            background-color: white;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .message-item:hover {
+            transform: translateY(-2px);
+        }
+        .message-meta {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .message-content {
+            margin: 0.5rem 0;
+            color: #333;
+            line-height: 1.4;
+        }
+        .message-actions {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #eee;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-link {
+            color: #007bff;
+            text-decoration: none;
+            margin-right: 1rem;
+            font-size: 0.9rem;
+        }
+        .btn-link:hover {
+            text-decoration: underline;
+        }
+        .new-message-btn {
+            display: inline-block;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="message-container">
+        <h2>Message History</h2>
+        <ul class="message-list">
+            {% for message in messages %}
+                <li class="message-item">
+                    <div class="message-meta">
+                        <strong>From:</strong> {{ message.sender }} 
+                        <strong>To:</strong> {{ message.recipient }}
+                    </div>
+                    <div class="message-content">
+                        {{ message.content }}
+                    </div>
+                    <div class="message-meta">
+                        <strong>Sent:</strong> {{ message.timestamp }}
+                    </div>
+                    <div class="message-actions">
+                        <a href="{% url 'edit_message' message.pk %}" class="btn-link">Edit</a>
+                        <a href="{% url 'delete_message' message.pk %}" class="btn-link delete-btn">Delete</a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'send_message' %}" class="btn btn-primary new-message-btn">Send a New Message</a>
+    </div>
+
+    <script>
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!confirm('Are you sure you want to delete this message?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
