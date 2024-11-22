@@ -35,3 +35,51 @@
     text-align: center;
     margin-top: 1rem;
 }
+/* Add to your existing profile.css */
+.header-buttons {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.edit-button {
+    background-color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: background-color 0.2s;
+}
+
+.edit-button:hover {
+    background-color: #f0f0f0;
+}
+
+.edit-button svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Update the existing follow-button class */
+.follow-button {
+    position: static;  /* Remove absolute positioning */
+    background-color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.follow-button:hover {
+    background-color: #f0f0f0;
+}
