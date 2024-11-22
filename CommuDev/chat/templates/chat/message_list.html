@@ -1,0 +1,14 @@
+<h2>Message History</h2>
+<ul>
+    {% for message in messages %}
+        <li>
+            <strong>From:</strong> {{ message.sender }} 
+            <strong>To:</strong> {{ message.recipient }} 
+            <strong>Message:</strong> {{ message.content }} 
+            <strong>Sent:</strong> {{ message.timestamp }}
+            <a href="{% url 'edit_message' message.pk %}">Edit</a>
+            <a href="{% url 'delete_message' message.pk %}">Delete</a>
+        </li>
+    {% endfor %}
+</ul>
+<a href="{% url 'send_message' %}">Send a New Message</a>
