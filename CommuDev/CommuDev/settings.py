@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'taskManager',
     'leaderboard',
     'message',
+    'chat',
 
 ]
 
@@ -132,7 +133,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "newsfeed/static",  # Add your app's static directory
     BASE_DIR / "resourcehub/static",
-    BASE_DIR / "message/static",
+   
 ]
 
 # Default primary key field type
