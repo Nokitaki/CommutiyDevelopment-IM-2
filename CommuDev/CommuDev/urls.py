@@ -28,7 +28,5 @@ urlpatterns = [
    path("rewards/", include("rewards.urls")),
    path('users/', include('users.urls')),  # Changed from /login to users/
    path('tasks/', include('taskManager.urls')), 
-   path('leaderboard/', include('leaderboard.urls')),
-   path('messages/', include('message.urls')),
    path('chat/', include("chat.urls")),
 ]

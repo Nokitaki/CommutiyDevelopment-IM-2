@@ -1,7 +1,9 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import NewsFeed  
 from .forms import NewsFeedForm
+from django.views.decorators.http import require_POST
 
 @login_required
 def home(request):
@@ -11,23 +13,11 @@ def home(request):
         if form.is_valid():
             new_post = form.save(commit=False)
             new_post.created_by = request.user
-            new_post.post_type = 'Active'
             new_post.save()
             return redirect('home')
     newsfeeds = NewsFeed.objects.filter(post_type='Active').order_by('-post_date')
     return render(request, 'newsfeed/home.html', {'form': form, 'newsfeeds': newsfeeds})
 
-@login_required
-def create_post(request):
-    form = NewsFeedForm()
-    if request.method == 'POST':
-        form = NewsFeedForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.created_by = request.user
-            post.save()
-            return redirect('home')
-    return render(request, 'newsfeed/create_post.html', {'form': form})
 
 @login_required
 def like_post(request, feed_id):
@@ -37,24 +27,25 @@ def like_post(request, feed_id):
     return redirect('home')
 
 @login_required
+@require_POST
 def update_post(request, feed_id):
-    post = get_object_or_404(NewsFeed, feed_id=feed_id)
-    if request.user != post.created_by:
-        return redirect('home')
-    form = NewsFeedForm(instance=post)
-    if request.method == "POST":
-        form = NewsFeedForm(request.POST, instance=post)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    return render(request, 'newsfeed/update_post.html', {'form': form})
+    post = get_object_or_404(NewsFeed, feed_id=feed_id, created_by=request.user)
+    try:
+        data = json.loads(request.body)
+        post.post_description = data.get('post_description')
+        post.save()
+        return JsonResponse({'status': 'success'})
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 @login_required
+@require_POST
 def delete_post(request, feed_id):
-    post = get_object_or_404(NewsFeed, feed_id=feed_id)
-    if request.user != post.created_by:
-        return redirect('home')
-    if request.method == "POST":
+    post = get_object_or_404(NewsFeed, feed_id=feed_id, created_by=request.user)
+    try:
         post.delete()
-        return redirect('home')
-    return render(request, 'newsfeed/confirm_delete.html', {'post': post})
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)

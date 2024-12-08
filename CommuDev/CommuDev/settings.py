@@ -43,8 +43,6 @@ INSTALLED_APPS = [
     'rewards',
     'users',  
     'taskManager',
-    'leaderboard',
-    'message',
     'chat',
 
 ]
