@@ -3,67 +3,291 @@
 
 {% block extra_css %}
     <link href="{% static 'users/css/profile.css' %}" rel="stylesheet">
+
+    
     <style>
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
+    :root {
+        --primary-color: #3b82f6;
+        --secondary-color: #10b981;
+        --background-color: #f3f4f6;
+        --text-color: #1f2937;
+    }
 
-        .modal-content {
-            position: relative;
-            background-color: white;
-            margin: 5% auto;
-            padding: 20px;
-            width: 90%;
-            max-width: 500px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+    body {
+        background-color: var(--background-color);
+        font-family: 'Inter', sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+    }
 
-        .profile-picture-preview {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            overflow: hidden;
-            position: relative;
-            cursor: pointer;
-            border: 3px solid #e2e8f0;
-        }
+    .profile-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
 
-        .profile-picture-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    .profile-container:hover {
+        transform: scale(1.02);
+    }
 
-        .profile-picture-preview:hover::after {
-            content: 'Change Photo';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 5px;
-            text-align: center;
-            font-size: 14px;
-        }
+    .profile-header {
+        position: relative;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        text-align: center;
+    }
 
-        .close-modal {
-            position: absolute;
-            right: 20px;
-            top: 20px;
-            cursor: pointer;
-            font-size: 24px;
-        }
-    </style>
+    .profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid white;
+    object-fit: cover;
+    position: absolute;
+    bottom: -75px;
+    left: 50%; 
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: 
+        transform 0.3s ease-out, 
+        box-shadow 0.3s ease-out;
+    cursor: pointer;
+}
+
+.profile-avatar:hover {
+    transform: translateX(-50%) scale(1.1); /* Slightly larger scale */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Optional: Add a subtle glow effect */
+.profile-avatar:hover::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: radial-gradient(circle, rgba(59,130,246,0.2) 0%, rgba(16,185,134,0.1) 100%);
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
+
+.profile-avatar:hover::before {
+    opacity: 1;
+}
+
+    .header-buttons {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .follow-button, .edit-button {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: background 0.3s ease;
+    }
+
+    .follow-button:hover, .edit-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .profile-info {
+        margin-top: 100px;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .profile-stats {
+        display: flex;
+        justify-content: space-around;
+        background: #f9fafb;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .stat-box {
+        flex: 1;
+        padding: 10px;
+        border-radius: 10px;
+        transition: background-color 0.3s ease;
+    }
+
+    .stat-box:hover {
+        background-color: #e5e7eb;
+    }
+
+    .profile-details {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .rating {
+        color: #fbbf24;
+        font-size: 1.2rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-around;
+        padding: 20px;
+    }
+
+    .message-button, .report-button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 20px;
+        border-radius: 25px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .message-button:hover, .report-button:hover {
+        background-color: #2563eb;
+        transform: translateY(-3px);
+    }
+
+    /* Modal and Profile Picture Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 15px;
+        max-width: 500px;
+        margin: 10% auto;
+        padding: 30px;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-picture-preview {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    overflow: hidden;
+    position: relative;
+    border: 4px solid #3b82f6;
+    background-color: #f3f4f6;
+}
+
+.profile-picture-preview img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 10;
+}
+
+.profile-picture-preview::before {
+    content: 'Upload Photo';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    color: #6b7280;
+    text-align: center;
+    opacity: 0.7;
+}
+
+.profile-picture-preview:hover::after {
+    content: 'Change Photo';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    text-align: center;
+    padding: 10px;
+    z-index: 20;
+}
+    .home-button {
+        display: block;
+        text-align: center;
+        padding: 15px;
+        background-color: var(--primary-color);
+        color: white;
+        text-decoration: none;
+        border-radius: 0 0 16px 16px;
+        transition: background-color 0.3s ease;
+    }
+
+    .home-button:hover {
+        background-color: #2563eb;
+    }
+    .profile-bio {
+    text-align: center;
+    padding: 15px;
+    margin: 10px 0;
+    background-color: #f9fafb;
+    border-radius: 8px;
+    font-style: italic;
+    color: #4b5563;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: background-color 0.3s ease;
+}
+
+.profile-bio:hover {
+    background-color: #f3f4f6;
+}
+
+.biography-text {
+    line-height: 1.6;
+    word-wrap: break-word;
+    max-width: 100%;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -94,8 +318,14 @@
     </div>
 
     <div class="profile-info">
+       
+        
         <h2 class="profile-name">{{ user.firstname }} {{ user.lastname }}</h2>
         <span class="profile-occupation">{{ user.employmentStatus }}</span>
+
+        <div class="profile-bio">
+            <p class="biography-text">{{ user.biography|default:"Add a short biography to tell others about yourself" }}</p>
+        </div>
     </div>
 
     <div class="profile-stats">
@@ -169,6 +399,18 @@
                 </div>
 
                 <div style="margin-bottom: 15px;">
+                    <label for="id_biography">Biography</label>
+                    <textarea 
+                        id="id_biography" 
+                        name="biography" 
+                        rows="4" 
+                        class="form-control" 
+                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"
+                        placeholder="Tell us a bit about yourself"
+                    >{{ user.biography }}</textarea>
+                </div>
+
+                <div style="margin-bottom: 15px;">
                     <label for="id_firstname">First Name</label>
                     <input type="text" id="id_firstname" name="firstname" value="{{ user.firstname }}" 
                            class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
@@ -222,6 +464,25 @@ function closeEditModal() {
     document.getElementById('editProfileModal').style.display = 'none';
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    const biographyTextarea = document.getElementById('id_biography');
+    const maxLength = 250; // Adjust as needed
+
+    biographyTextarea.addEventListener('input', function() {
+        // Trim the content if it exceeds max length
+        if (this.value.length > maxLength) {
+            this.value = this.value.substr(0, maxLength);
+        }
+
+        // Optional: Show remaining characters
+        const remainingChars = maxLength - this.value.length;
+        const charCountSpan = document.getElementById('biography-char-count');
+        if (charCountSpan) {
+            charCountSpan.textContent = `${remainingChars} characters remaining`;
+        }
+    });
+});
+
 // Preview profile picture before upload
 document.querySelector('.profile-picture-preview').addEventListener('click', function() {
     document.getElementById('id_profile_picture').click();
@@ -236,6 +497,36 @@ document.getElementById('id_profile_picture').addEventListener('change', functio
         reader.readAsDataURL(e.target.files[0]);
     }
 });
+
+function validateForm() {
+    const firstname = document.getElementById('id_firstname').value.trim();
+    const lastname = document.getElementById('id_lastname').value.trim();
+    const age = document.getElementById('id_age').value;
+    const state = document.getElementById('id_state').value.trim();
+
+    // Basic validation
+    if (!firstname || !lastname || !age || !state) {
+        alert('Please fill in all required fields');
+        return false;
+    }
+
+    if (age < 18 || age > 120) {
+        alert('Please enter a valid age');
+        return false;
+    }
+
+    return true;
+}
+
+document.querySelector('form').addEventListener('submit', function(e) {
+    if (!validateForm()) {
+        e.preventDefault();
+    }
+});
+
+
+
+
 
 // Close modal when clicking outside
 window.onclick = function(event) {
