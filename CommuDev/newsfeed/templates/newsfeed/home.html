@@ -1,281 +1,431 @@
+<!--newsfeed/templates/newsfeed/home.html-->
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CommuDev Feed</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-</head>
-<body class="bg-gray-50">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body class="bg-gray-50">
     <!-- Navigation Bar -->
     <nav class="bg-white border-b sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex-shrink-0">
-                    <h1 class="text-2xl font-bold text-gray-900">CommuDev</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="{% url 'home' %}" class="text-gray-600 hover:text-gray-900">
-                        <i class="fas fa-home text-xl"></i>
-                    </a>
-                    <a href="{% url 'resource_home' %}" class="text-gray-600 hover:text-gray-900">
-                        <i class="fas fa-book text-xl"></i>
-                    </a>
-                    <a href="{% url 'profile' %}" class="text-gray-600 hover:text-gray-900">
-                        <i class="fas fa-user-circle text-xl"></i>
-                    </a>
-                </div>
-            </div>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex-shrink-0">
+            <h1 class="text-2xl font-bold text-gray-900">CommuDev</h1>
+          </div>
+          <div class="flex items-center space-x-4">
+            <a
+              href="{% url 'home' %}"
+              class="text-gray-600 hover:text-gray-900"
+            >
+              <i class="fas fa-home text-xl"></i>
+            </a>
+            <a
+              href="{% url 'resource_home' %}"
+              class="text-gray-600 hover:text-gray-900"
+            >
+              <i class="fas fa-book text-xl"></i>
+            </a>
+            <a
+              href="{% url 'profile' %}"
+              class="text-gray-600 hover:text-gray-900"
+            >
+              <i class="fas fa-user-circle text-xl"></i>
+            </a>
+          </div>
         </div>
+      </div>
     </nav>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex space-x-4">
-            <!-- Left Sidebar -->
-            <div class="w-64 flex-shrink-0 space-y-4">
-                <!-- Communities Section -->
-                <div class="bg-white rounded-lg shadow p-4">
-                    <h2 class="font-bold text-lg mb-4">Communities</h2>
-                    <ul class="space-y-2">
-                        <li>
-                            <a href="#" class="flex items-center space-x-2 text-gray-700 hover:bg-gray-100 p-2 rounded">
-                                <i class="fas fa-building"></i>
-                                <span>Municipal Community</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="flex items-center space-x-2 text-gray-700 hover:bg-gray-100 p-2 rounded">
-                                <i class="fas fa-home"></i>
-                                <span>Barangay Community</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+      <div class="flex space-x-4">
+        <!-- Left Sidebar -->
+        <div class="w-64 flex-shrink-0 space-y-4">
+          <!-- Communities Section -->
+          <div class="bg-white rounded-lg shadow p-4">
+            <h2 class="font-bold text-lg mb-4">Communities</h2>
+            <ul class="space-y-2">
+              <li>
+                <a
+                  href="#"
+                  class="flex items-center space-x-2 text-gray-700 hover:bg-gray-100 p-2 rounded"
+                >
+                  <i class="fas fa-building"></i>
+                  <span>Municipal Community</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="flex items-center space-x-2 text-gray-700 hover:bg-gray-100 p-2 rounded"
+                >
+                  <i class="fas fa-home"></i>
+                  <span>Barangay Community</span>
+                </a>
+              </li>
+            </ul>
+          </div>
 
-                <!-- Friends List -->
-                <div class="bg-white rounded-lg shadow p-4">
-                    <h2 class="font-bold text-lg mb-4">Friends</h2>
-                    <ul class="space-y-2">
-                        <li class="flex items-center space-x-2">
-                            <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
-                            <span>Friend 1</span>
-                        </li>
-                        <li class="flex items-center space-x-2">
-                            <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
-                            <span>Friend 2</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Main Content -->
-            <div class="flex-1">
-                <!-- Create Post Form -->
-                <div class="bg-white rounded-lg shadow mb-8 p-6">
-                    <form method="POST" class="space-y-4">
-                        {% csrf_token %}
-                        <div class="flex items-start space-x-4">
-                            <div class="flex-shrink-0">
-                                <div class="h-10 w-10 rounded-full bg-gray-300">
-                                    <i class="fas fa-user-circle text-gray-500 text-2xl p-2"></i>
-                                </div>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                {{ form.post_description }}
-                                <button type="submit" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                                    Post
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Posts Feed -->
-                {% for post in newsfeeds %}
-                <article class="bg-white rounded-lg shadow mb-6">
-                    <!-- Post Header -->
-                    <div class="p-4 flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="h-10 w-10 rounded-full bg-gray-300">
-                                <i class="fas fa-user-circle text-gray-500 text-2xl p-2"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-900">{{ post.created_by.firstname }} {{ post.created_by.lastname }}</p>
-                                <p class="text-sm text-gray-500">{{ post.post_date|date:"F j, Y" }}</p>
-                            </div>
-                        </div>
-                        {% if post.created_by == user %}
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" class="text-gray-400 hover:text-gray-600">
-                                <i class="fas fa-ellipsis-h"></i>
-                            </button>
-                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                                <button onclick="editPost('{{ post.feed_id }}')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
-                                    <i class="fas fa-edit mr-2"></i> Edit
-                                </button>
-                                <button onclick="deletePost('{{ post.feed_id }}')" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left">
-                                    <i class="fas fa-trash mr-2"></i> Delete
-                                </button>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Post Content -->
-                    <div class="px-4 py-3">
-                        <p class="text-gray-800 whitespace-pre-line">{{ post.post_description }}</p>
-                    </div>
-
-                    <!-- Post Actions -->
-                    <div class="border-t px-4 py-3">
-                        <div class="flex items-center space-x-4">
-                            <form action="{% url 'like_post' post.feed_id %}" method="POST" class="flex items-center">
-                                {% csrf_token %}
-                                <button type="submit" class="flex items-center space-x-2 text-gray-500 hover:text-red-500">
-                                    <i class="fas fa-heart"></i>
-                                    <span>{{ post.like_count }}</span>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </article>
-                {% empty %}
-                <div class="text-center py-8">
-                    <p class="text-gray-500">No posts yet. Be the first to share something!</p>
-                </div>
-                {% endfor %}
-            </div>
-
-            <!-- Right Sidebar -->
-            <div class="w-64 flex-shrink-0 space-y-4">
-                <!-- Calendar -->
-                <div class="bg-white rounded-lg shadow p-4">
-                    <h2 class="font-bold text-lg mb-4">Calendar</h2>
-                    <div class="bg-gray-100 p-4 rounded">
-                        <p class="text-center text-gray-600">Calendar Placeholder</p>
-                    </div>
-                </div>
-
-                <!-- Notifications -->
-                <div class="bg-white rounded-lg shadow p-4">
-                    <h2 class="font-bold text-lg mb-4">Notifications</h2>
-                    <div class="space-y-2">
-                        <div class="p-2 hover:bg-gray-100 rounded">
-                            <p class="text-sm text-gray-600">New like on your post</p>
-                            <p class="text-xs text-gray-400">2 hours ago</p>
-                        </div>
-                        <div class="p-2 hover:bg-gray-100 rounded">
-                            <p class="text-sm text-gray-600">Someone commented on your post</p>
-                            <p class="text-xs text-gray-400">5 hours ago</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          <!-- Friends List -->
+          <div class="bg-white rounded-lg shadow p-4">
+            <h2 class="font-bold text-lg mb-4">Friends</h2>
+            <ul class="space-y-2">
+              <li class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
+                <span>Friend 1</span>
+              </li>
+              <li class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
+                <span>Friend 2</span>
+              </li>
+            </ul>
+          </div>
         </div>
+
+        <!-- Main Content -->
+        <div class="flex-1">
+          <!-- Create Post Form -->
+          <div class="bg-white rounded-lg shadow mb-8 p-6">
+            <form method="POST" class="space-y-4">
+              {% csrf_token %}
+              <div class="flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                  <div class="h-10 w-10 rounded-full bg-gray-300">
+                    <i
+                      class="fas fa-user-circle text-gray-500 text-2xl p-2"
+                    ></i>
+                  </div>
+                </div>
+                <div class="min-w-0 flex-1">
+                  {{ form.post_description }}
+                  <button
+                    type="submit"
+                    class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  >
+                    Post
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Posts Feed -->
+          {% for post in newsfeeds %}
+          <article class="bg-white rounded-lg shadow mb-6">
+            <!-- Post Header -->
+            <div class="p-4 flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 rounded-full bg-gray-300">
+                  <i class="fas fa-user-circle text-gray-500 text-2xl p-2"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-900">
+                    {{ post.created_by.firstname|default:'' }} {{ post.created_by.lastname|default:'' }}
+                  </p>
+                  <p class="text-sm text-gray-500">
+                    {{ post.post_date|date:"F j, Y" }}
+                  </p>
+                </div>
+              </div>
+              {% if post.created_by == user %}
+              <div class="relative" x-data="{ open: false }">
+                <button
+                  @click="open = !open"
+                  class="text-gray-400 hover:text-gray-600"
+                >
+                  <i class="fas fa-ellipsis-h"></i>
+                </button>
+                <div
+                  x-show="open"
+                  @click.away="open = false"
+                  class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1"
+                >
+                  <button
+                    onclick="editPost('{{ post.feed_id }}')"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  >
+                    <i class="fas fa-edit mr-2"></i> Edit
+                  </button>
+                  <button
+                    onclick="deletePost('{{ post.feed_id }}')"
+                    class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left"
+                  >
+                    <i class="fas fa-trash mr-2"></i> Delete
+                  </button>
+                </div>
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Post Content -->
+            <div class="px-4 py-3">
+              <p class="text-gray-800 whitespace-pre-line">
+                {{ post.post_description }}
+              </p>
+            </div>
+
+            <!-- Post Actions -->
+            <div class="border-t px-4 py-3">
+              <div class="flex items-center space-x-4">
+                <form
+                  id="like-form-{{ post.feed_id }}"
+                  class="like-form flex items-center"
+                >
+                  {% csrf_token %}
+                  <button
+                    type="button"
+                    data-post-id="{{ post.feed_id }}"
+                    class="like-button flex items-center space-x-2 {% if request.user in post.likes.all %}text-red-500{% else %}text-gray-500{% endif %} hover:text-red-500"
+                  >
+                    <i class="fas fa-heart"></i>
+                    <span class="like-count">{{ post.like_count }}</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </article>
+          {% empty %}
+          <div class="text-center py-8">
+            <p class="text-gray-500">
+              No posts yet. Be the first to share something!
+            </p>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="w-64 flex-shrink-0 space-y-4">
+          <!-- Calendar -->
+          <div class="bg-white rounded-lg shadow p-4">
+            <h2 class="font-bold text-lg mb-4">Calendar</h2>
+            <div class="bg-gray-100 p-4 rounded">
+              <p class="text-center text-gray-600">Calendar Placeholder</p>
+            </div>
+          </div>
+
+          <!-- Notifications -->
+          <div class="bg-white rounded-lg shadow p-4">
+            <h2 class="font-bold text-lg mb-4">Notifications</h2>
+            <div class="space-y-2">
+              <div class="p-2 hover:bg-gray-100 rounded">
+                <p class="text-sm text-gray-600">New like on your post</p>
+                <p class="text-xs text-gray-400">2 hours ago</p>
+              </div>
+              <div class="p-2 hover:bg-gray-100 rounded">
+                <p class="text-sm text-gray-600">
+                  Someone commented on your post
+                </p>
+                <p class="text-xs text-gray-400">5 hours ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Edit Post Modal -->
-    <div id="editModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3 text-center">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Post</h3>
-                <div class="mt-2 px-7 py-3">
-                    <textarea id="editContent" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none" rows="4"></textarea>
-                </div>
-                <div class="items-center px-4 py-3">
-                    <button id="saveEdit" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                        Save
-                    </button>
-                    <button onclick="closeEditModal()" class="ml-3 px-4 py-2 bg-gray-100 text-gray-700 text-base font-medium rounded-md shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                        Cancel
-                    </button>
-                </div>
-            </div>
+    <div
+      id="editModal"
+      class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+    >
+      <div
+        class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white"
+      >
+        <div class="mt-3 text-center">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Post</h3>
+          <div class="mt-2 px-7 py-3">
+            <textarea
+              id="editContent"
+              class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none"
+              rows="4"
+            ></textarea>
+          </div>
+          <div class="items-center px-4 py-3">
+            <button
+              id="saveEdit"
+              class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            >
+              Save
+            </button>
+            <button
+              onclick="closeEditModal()"
+              class="ml-3 px-4 py-2 bg-gray-100 text-gray-700 text-base font-medium rounded-md shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3 text-center">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Delete Post</h3>
-                <div class="mt-2 px-7 py-3">
-                    <p class="text-sm text-gray-500">Are you sure you want to delete this post? This action cannot be undone.</p>
-                </div>
-                <div class="items-center px-4 py-3">
-                    <button id="confirmDelete" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
-                        Delete
-                    </button>
-                    <button onclick="closeDeleteModal()" class="ml-3 px-4 py-2 bg-gray-100 text-gray-700 text-base font-medium rounded-md shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                        Cancel
-                    </button>
-                </div>
-            </div>
+    <div
+      id="deleteModal"
+      class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+    >
+      <div
+        class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white"
+      >
+        <div class="mt-3 text-center">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">
+            Delete Post
+          </h3>
+          <div class="mt-2 px-7 py-3">
+            <p class="text-sm text-gray-500">
+              Are you sure you want to delete this post? This action cannot be
+              undone.
+            </p>
+          </div>
+          <div class="items-center px-4 py-3">
+            <button
+              id="confirmDelete"
+              class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300"
+            >
+              Delete
+            </button>
+            <button
+              onclick="closeDeleteModal()"
+              class="ml-3 px-4 py-2 bg-gray-100 text-gray-700 text-base font-medium rounded-md shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Alpine.js for dropdown functionality -->
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
+
     <script>
-        let currentPostId = null;
+      let currentPostId = null;
 
-        function editPost(postId) {
-            currentPostId = postId;
-            const modal = document.getElementById('editModal');
-            const content = document.querySelector(`[data-post-id="${postId}"]`).textContent;
-            document.getElementById('editContent').value = content;
-            modal.classList.remove('hidden');
-        }
+      function editPost(postId) {
+        currentPostId = postId;
+        const modal = document.getElementById("editModal");
+        const content = document.querySelector(
+          `[data-post-id="${postId}"]`
+        ).textContent;
+        document.getElementById("editContent").value = content;
+        modal.classList.remove("hidden");
+      }
 
-        function closeEditModal() {
-            document.getElementById('editModal').classList.add('hidden');
-        }
+      function closeEditModal() {
+        document.getElementById("editModal").classList.add("hidden");
+      }
 
-        function deletePost(postId) {
-            currentPostId = postId;
-            document.getElementById('deleteModal').classList.remove('hidden');
-        }
+      function deletePost(postId) {
+        currentPostId = postId;
+        document.getElementById("deleteModal").classList.remove("hidden");
+      }
 
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').classList.add('hidden');
-        }
+      function closeDeleteModal() {
+        document.getElementById("deleteModal").classList.add("hidden");
+      }
 
-        // Save edit
-        document.getElementById('saveEdit').addEventListener('click', function() {
-            const content = document.getElementById('editContent').value;
-            fetch(`/news/update/${currentPostId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-                body: JSON.stringify({
-                    post_description: content
-                })
-            }).then(response => {
-                if (response.ok) {
-                    window.location.reload();
-                }
-            });
+      // Save edit
+      document
+        .getElementById("saveEdit")
+        .addEventListener("click", function () {
+          const content = document.getElementById("editContent").value;
+          fetch(`/news/update/${currentPostId}/`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": document.querySelector(
+                "[name=csrfmiddlewaretoken]"
+              ).value,
+            },
+            body: JSON.stringify({
+              post_description: content,
+            }),
+          }).then((response) => {
+            if (response.ok) {
+              window.location.reload();
+            }
+          });
         });
 
-        // Confirm delete
-        document.getElementById('confirmDelete').addEventListener('click', function() {
-            fetch(`/news/delete/${currentPostId}/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                }
-            }).then(response => {
-                if (response.ok) {
-                    window.location.reload();
-                }
-            });
+      // Confirm delete
+      document
+        .getElementById("confirmDelete")
+        .addEventListener("click", function () {
+          fetch(`/news/delete/${currentPostId}/`, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": document.querySelector(
+                "[name=csrfmiddlewaretoken]"
+              ).value,
+            },
+          }).then((response) => {
+            if (response.ok) {
+              window.location.reload();
+            }
+          });
         });
     </script>
-</body>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const likeButtons = document.querySelectorAll(".like-button");
+
+        likeButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const postId = this.getAttribute("data-post-id");
+            const csrfToken = document.querySelector(
+              "[name=csrfmiddlewaretoken]"
+            ).value;
+
+            fetch(`/news/like/${postId}/`, {
+              // Note the 'news/' prefix
+              method: "POST",
+              headers: {
+                "X-CSRFToken": csrfToken,
+                "Content-Type": "application/json",
+              },
+            })
+              .then((response) => {
+                // Check if the response is OK
+                if (!response.ok) {
+                  throw new Error("Network response was not ok");
+                }
+                return response.json();
+              })
+              .then((data) => {
+                // Check the status in the response
+                if (data.status === "success") {
+                  // Update like count and button style
+                  const likeCountElement = this.querySelector(".like-count");
+                  likeCountElement.textContent = data.like_count;
+
+                  if (data.liked) {
+                    this.classList.remove("text-gray-500");
+                    this.classList.add("text-red-500");
+                  } else {
+                    this.classList.remove("text-red-500");
+                    this.classList.add("text-gray-500");
+                  }
+                } else {
+                  console.error("Like action failed:", data.message);
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                alert(
+                  "An error occurred while processing your like/unlike action"
+                );
+              });
+          });
+        });
+      });
+    </script>
+  </body>
 </html>

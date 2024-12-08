@@ -1,3 +1,4 @@
+#CommuDev/settings.py
 """
 Django settings for CommuDev project.
 

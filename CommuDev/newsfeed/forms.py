@@ -1,7 +1,8 @@
+#newsfeed/forms.py
 from django import forms
 from .models import NewsFeed
 
-# In forms.py
+
 class NewsFeedForm(forms.ModelForm):
     class Meta:
         model = NewsFeed

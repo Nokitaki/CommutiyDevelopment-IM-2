@@ -1,3 +1,4 @@
+#feedback/admin.py
 from django.contrib import admin
 
 from feedback.models import Feedback

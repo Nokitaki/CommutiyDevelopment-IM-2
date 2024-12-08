@@ -9,7 +9,11 @@ class NewsFeed(models.Model):
     post_description = models.TextField(default="")
     post_date = models.DateTimeField(default=timezone.now)
     post_type = models.CharField(max_length=20, default='Active')
-    like_count = models.IntegerField(default=0)
+    likes = models.ManyToManyField(User, related_name='liked_posts', blank=True)
+
+    @property
+    def like_count(self):
+        return self.likes.count()
 
     def __str__(self):
         return f"Feed {self.feed_id} by {self.created_by}"

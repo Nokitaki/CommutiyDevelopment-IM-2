@@ -1,3 +1,4 @@
+#resourcehub/urls.py
 from django.urls import path
 from .views import create_resource, like_resource, update_resource, delete_resource, resource_list
 
