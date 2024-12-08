@@ -4,6 +4,9 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from .forms import UserRegistrationForm, UserProfileEditForm
 from .models import User
+from django.contrib.auth import logout
+
+
 
 def register(request):
     if request.method == 'POST':
@@ -57,3 +60,8 @@ def edit_profile(request):
         'submit_text': 'Save Changes'  
     }
     return render(request, 'users/user_form.html', context)
+
+
+def user_logout(request):
+    logout(request)
+    return redirect('login')
