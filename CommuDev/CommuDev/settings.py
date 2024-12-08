@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'users',  
     'taskManager',
     'chat',
+    'calendar_events',
 
 ]
 

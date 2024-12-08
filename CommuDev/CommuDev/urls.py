@@ -32,6 +32,7 @@ urlpatterns = [
     path('users/', include('users.urls')),  # Changed from /login to users/
     path('tasks/', include('taskManager.urls')), 
     path('chat/', include("chat.urls")),
+    path('calendar/', include('calendar_events.urls')),
 ] 
 
 if settings.DEBUG:
