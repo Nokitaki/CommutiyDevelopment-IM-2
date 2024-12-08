@@ -1,4 +1,3 @@
-# users/models.py
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 import uuid
@@ -13,6 +12,10 @@ class User(AbstractUser):
     employmentStatus = models.CharField(max_length=100)
     points = models.IntegerField(default=0)
     profile_picture = models.ImageField(upload_to='profile_pics', default='default.jpg')
+
+    # Keep username for login purposes
+    USERNAME_FIELD = 'username'  # This ensures username is used for login
+    REQUIRED_FIELDS = ['firstname', 'lastname']  # Required fields for createsuperuser
 
     def __str__(self):
         return f"{self.firstname} {self.lastname}"
