@@ -7,6 +7,7 @@ class NewsFeed(models.Model):
     feed_id = models.AutoField(primary_key=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_posts')
     post_description = models.TextField(default="")
+    image = models.ImageField(upload_to='post_images/', null=True, blank=True)
     post_date = models.DateTimeField(default=timezone.now)
     post_type = models.CharField(max_length=20, default='Active')
     likes = models.ManyToManyField(User, related_name='liked_posts', blank=True)

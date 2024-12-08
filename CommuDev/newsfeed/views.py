@@ -10,14 +10,16 @@ import json
 
 @login_required
 def home(request):
-    form = NewsFeedForm()
     if request.method == 'POST':
-        form = NewsFeedForm(request.POST)
+        form = NewsFeedForm(request.POST, request.FILES)
         if form.is_valid():
             new_post = form.save(commit=False)
             new_post.created_by = request.user
             new_post.save()
             return redirect('home')
+    else:
+        form = NewsFeedForm()
+    
     newsfeeds = NewsFeed.objects.filter(post_type='Active').order_by('-post_date')
     return render(request, 'newsfeed/home.html', {'form': form, 'newsfeeds': newsfeeds})
 
