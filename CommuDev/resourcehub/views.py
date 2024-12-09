@@ -144,5 +144,21 @@ def download_resource(request, resource_id):
             'status': 'error',
             'message': str(e)
         }, status=400)
+        
+def resource_home(request):
+    category_id = request.GET.get('category')
+    
+    if category_id:
+        resources = ResourceHub.objects.filter(category_id=category_id)
+    else:
+        resources = ResourceHub.objects.all()
+    
+    categories = Category.objects.all()
+    
+    return render(request, 'home.html', {
+        'resources': resources,
+        'categories': categories,
+        'selected_category': category_id
+    })
 
 

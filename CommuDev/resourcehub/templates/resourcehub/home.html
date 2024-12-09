@@ -258,6 +258,7 @@
                 <div class="px-4 mb-4">
                     <div class="bg-white rounded-lg shadow p-4">
                         <h3 class="font-semibold text-lg mb-3">Categories</h3>
+                        {% csrf_token %}
                         <div class="flex flex-wrap gap-2">
                             <a href="{% url 'resource_home' %}" 
                             class="category-pill px-4 py-2 rounded-full {% if not selected_category %}bg-blue-500 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
@@ -275,7 +276,9 @@
                 <!-- Resource card in list view -->
                 <div class="resource-grid">
                     {% for resource in resources %}
-                    <div class="resource-card shadow cursor-pointer" onclick="openResourceModal('{{ resource.resource_id }}')">
+                    <div class="resource-card shadow cursor-pointer" 
+                    data-category="{{ resource.category.id }}" 
+                    onclick="openResourceModal('{{ resource.resource_id }}')">
                         {% if resource.image %}
                         <img src="{{ resource.image.url }}" alt="{{ resource.resource_title }}" class="resource-image">
                         {% else %}
@@ -1040,7 +1043,42 @@
                     });
             });
         </script>
-
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const categoryPills = document.querySelectorAll('.category-pill');
+                const resourceCards = document.querySelectorAll('.resource-card');
+            
+                categoryPills.forEach(pill => {
+                    pill.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        // Remove active state from all pills
+                        categoryPills.forEach(p => {
+                            p.classList.remove('bg-blue-500', 'text-white');
+                            p.classList.add('bg-gray-100', 'text-gray-700');
+                        });
+            
+                        // Add active state to clicked pill
+                        this.classList.remove('bg-gray-100', 'text-gray-700');
+                        this.classList.add('bg-blue-500', 'text-white');
+            
+                        // Get selected category
+                        const selectedCategory = this.getAttribute('href').split('category=')[1] || 'all';
+            
+                        // Filter resources
+                        resourceCards.forEach(card => {
+                            const cardCategory = card.getAttribute('data-category');
+                            
+                            if (selectedCategory === 'all' || cardCategory === selectedCategory) {
+                                card.style.display = 'block';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        });
+                    });
+                });
+            });
+        </script>
 
 </body>
 </html>
