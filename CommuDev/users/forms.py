@@ -38,7 +38,7 @@ class UserProfileEditForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['firstname', 'lastname', 'age', 
-                 'state', 'employmentStatus', 'profile_picture']
+                 'state', 'employmentStatus', 'profile_picture', 'languages', 'activity_status','hobbies', 'goals']
         widgets = {
             'firstname': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -62,6 +62,14 @@ class UserProfileEditForm(forms.ModelForm):
             }),
             'profile_picture': forms.FileInput(attrs={
                 'class': 'form-control-file'
+            }),
+
+             'languages': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., English, Spanish, Python, JavaScript'
+            }),
+            'activity_status': forms.Select(attrs={
+                'class': 'form-control'
             })
         }
         

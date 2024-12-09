@@ -330,15 +330,26 @@
 
     <div class="profile-stats">
         <div class="stat-box">
-            <h3>Reward Pts</h3>
-            <p>{{ user.points|default:"0" }} Reward Pts</p>
+            <h3>Languages</h3>
+            <div class="language-tags">
+                {% if user.languages %}
+                    {% for language in user.languages.split %}
+                        <span class="language-tag">{{ language }}</span>
+                    {% endfor %}
+                {% else %}
+                    <p>No languages specified</p>
+                {% endif %}
+            </div>
         </div>
         <div class="stat-box">
-            <h3>Followers</h3>
-            <p>52 Followers</p>
+            <h3>Activity Status</h3>
+            <p class="activity-indicator {% if user.activity_status == 'Active' %}active{% elif user.activity_status == 'Moderate' %}moderate{% else %}inactive{% endif %}">
+                <span class="status-dot"></span>
+                {{ user.activity_status }}
+            </p>
         </div>
     </div>
-
+    
     <div class="profile-stats">
         <div class="stat-box">
             <h3>Hobbies</h3>
@@ -346,7 +357,7 @@
         </div>
         <div class="stat-box">
             <h3>Goals</h3>
-            <p>Community help<br>Seek friends</p>
+            <p>{{ user.goals|default:"Community help<br>Seek friends"|safe }}</p>
         </div>
     </div>
 
@@ -438,6 +449,38 @@
                     <label for="id_employmentStatus">Employment Status</label>
                     <input type="text" id="id_employmentStatus" name="employmentStatus" value="{{ user.employmentStatus }}"
                            class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="id_hobbies">Hobbies</label>
+                    <input type="text" id="id_hobbies" name="hobbies" value="{{ user.hobbies }}"
+                           class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter your hobbies">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label for="id_goals">Goals</label>
+                    <input type="text" id="id_goals" name="goals" value="{{ user.goals }}"
+                           class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="Enter your goals">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="id_languages">Languages</label>
+                    <input type="text" id="id_languages" name="languages" value="{{ user.languages }}"
+                           class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                           placeholder="e.g., English, Spanish, Python, JavaScript">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label for="id_activity_status">Activity Status</label>
+                    <select id="id_activity_status" name="activity_status" 
+                            class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="Active" {% if user.activity_status == 'Active' %}selected{% endif %}>Very Active</option>
+                        <option value="Moderate" {% if user.activity_status == 'Moderate' %}selected{% endif %}>Moderately Active</option>
+                        <option value="Low" {% if user.activity_status == 'Low' %}selected{% endif %}>Less Active</option>
+                        <option value="Inactive" {% if user.activity_status == 'Inactive' %}selected{% endif %}>Inactive</option>
+                    </select>
                 </div>
 
                 <div style="text-align: right; margin-top: 20px;">
