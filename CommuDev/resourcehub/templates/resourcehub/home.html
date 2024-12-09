@@ -295,7 +295,7 @@
                             </div>
             
                             <h3 class="font-bold text-lg text-gray-900 mb-2">{{ resource.resource_title }}</h3>
-                            <p class="text-gray-600 resource-preview mb-4">{{ resource.resource_description|striptags|truncatechars:400 }}</p>
+                            <p class="text-gray-600 resource-preview mb-4">{{ resource.resource_description|truncatewords:30|striptags}}</p>
                             
                             <div class="mt-auto flex items-center justify-between">
                                 <div class="text-sm text-gray-500">
