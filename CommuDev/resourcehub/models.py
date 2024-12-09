@@ -1,6 +1,7 @@
 # resourcehub/models.py
 from django.db import models
 from users.models import User
+from django.utils import timezone
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -18,7 +19,7 @@ class ResourceHub(models.Model):
     resource_title = models.CharField(max_length=200)
     resource_description = models.TextField(help_text="HTML content allowed")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resources')
-    upload_date = models.DateTimeField(auto_now_add=True)
+    upload_date = models.DateTimeField(default=timezone.now)
     download_count = models.IntegerField(default=0)
     image = models.ImageField(upload_to='resources/', null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='resources')
