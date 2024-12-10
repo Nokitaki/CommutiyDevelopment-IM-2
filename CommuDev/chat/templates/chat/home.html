@@ -209,7 +209,9 @@
         // Function to scroll messages to bottom
         function scrollToBottom() {
             const messagesContainer = document.getElementById('messages-container');
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            if (messagesContainer.scrollTop !== messagesContainer.scrollHeight) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
         }
     
         // Function to render contacts with message preview
@@ -277,6 +279,8 @@
         // Function to select a chat
         function selectChat(userId) {
             selectedUserId = userId;
+
+            
             
             // Try to find the user from either the users list or contacts list
             let userItem = document.querySelector(`.user-item[onclick="selectChat('${userId}')"]`) ||
@@ -302,10 +306,16 @@
             }
             
             loadMessages(userId);
+            setTimeout(() => {
+                scrollToBottom();
+            }, 100);
         }
+
+        
 
         // Function to load messages
         function loadMessages(userId) {
+            
             fetch(`/chat/messages/${userId}/`)
                 .then(response => response.json())
                 .then(data => {
@@ -321,6 +331,8 @@
                             month: 'long', 
                             day: 'numeric' 
                         });
+
+                        const contentWithBreaks = message.content.replace(/\n/g, '<br>');
         
                         // Add date separator if it's a different day
                         if (formattedDate !== currentDate) {
@@ -340,7 +352,7 @@
                                 <div class="flex ${isSender ? 'justify-end' : 'justify-start'} mb-3 group relative"
                                      data-message-id="${message.id}"
                                      data-is-sender="${isSender}">
-                                    <div class="flex flex-col max-w-[75%] min-w-[50px] relative">
+                                    <div class="flex flex-col max-w-[350px] min-w-[50px] relative">
                                         ${isSender ? `
                                             <button class="absolute -left-8 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                                     onclick="showMessageOptions(event, ${message.id})" aria-label="Message options">
@@ -350,8 +362,8 @@
                                         <div class="${isSender ? 'bg-[#0084ff] text-white' : 'bg-[#f0f0f0] text-black'} 
                                             rounded-[20px] px-4 py-2 
                                             ${isSender ? 'rounded-tr-[4px]' : 'rounded-tl-[4px]'}">
-                                            <p class="text-[15px] leading-[1.4]" id="message-content-${message.id}">
-                                                ${message.content}
+                                            <p class="text-[15px] leading-[1.4] break-words" id="message-content-${message.id}">
+                                                ${contentWithBreaks}
                                             </p>
                                         </div>
                                         <span class="text-xs text-gray-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity px-1">
@@ -362,15 +374,23 @@
                             `;
                         } else {
                             messageHTML += `
-                                <div class="flex justify-center my-2">
-                                    <span class="text-xs text-gray-500 italic">You unsent a message</span>
+                                <div class="flex justify-center my-2 mb-4">
+                                    <span class="text-xs text-gray-500 italic mb-4">You unsent a message</span>
                                 </div>
                             `;
                         }
                         return messageHTML;
                     }).join('');
-                    scrollToBottom();
+                    
                 });
+        }
+
+        function displayUnsentMessage(userName) {
+            return `
+                <div class="flex justify-center my-2 mb-4">
+                    <span class="text-xs text-gray-500 italic mb-4">${userName} has unsent a message</span>
+                </div>
+            `;
         }
         
         // Add these helper functions
