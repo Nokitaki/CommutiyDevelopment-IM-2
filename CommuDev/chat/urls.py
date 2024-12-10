@@ -11,4 +11,5 @@ urlpatterns = [
     path('mark-read/<uuid:user_id>/', views.mark_messages_read, name='mark_messages_read'),
     path('message/edit/<int:message_id>/', views.edit_message, name='edit_message'),
     path('message/unsend/<int:message_id>/', views.unsend_message, name='unsend_message'),
+    path('conversation/delete/<uuid:user_id>/', views.delete_conversation, name='delete_conversation'),
 ]

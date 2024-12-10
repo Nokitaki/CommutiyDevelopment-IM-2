@@ -34,7 +34,6 @@ def get_user_contacts(user):
     contact_ids = set(list(sent_to) + list(received_from))
     return User.objects.filter(userId__in=contact_ids).order_by('firstname')
 
-# chat/views.py
 
 @login_required
 def get_contacts(request):
@@ -43,17 +42,13 @@ def get_contacts(request):
             Q(sender=request.user) | Q(recipient=request.user)
         ).select_related('sender', 'recipient').order_by('-timestamp')
         
-        # Use a dictionary to keep track of the latest message for each contact
         contacts_dict = {}
         
         for message in messages:
-            # Determine if the contact is the sender or recipient
             contact = message.recipient if message.sender == request.user else message.sender
             contact_id = str(contact.userId)
             
-            # Only process if this is a new contact or a more recent message
             if contact_id not in contacts_dict:
-                # Get unread count for this contact
                 unread_count = Message.objects.filter(
                     sender=contact,
                     recipient=request.user,
@@ -65,17 +60,18 @@ def get_contacts(request):
                     'firstname': contact.firstname,
                     'lastname': contact.lastname,
                     'lastMessage': message.content,
-                    'lastMessageTime': localtime(message.timestamp).strftime('%I:%M %p'),
+                    'lastMessageTime': localtime(message.timestamp).strftime('%Y-%m-%d %H:%M:%S'),  # Add full timestamp
+                    'lastMessageTimeDisplay': localtime(message.timestamp).strftime('%I:%M %p'),
                     'unreadCount': unread_count
                 }
         
-        # Convert dictionary values to list
         contacts_list = list(contacts_dict.values())
+        # Sort contacts by lastMessageTime
+        contacts_list.sort(key=lambda x: x['lastMessageTime'], reverse=True)
         
         return JsonResponse({'contacts': contacts_list})
         
     except Exception as e:
-        # Log the error (you should set up proper logging)
         print(f"Error in get_contacts: {str(e)}")
         return JsonResponse(
             {'error': 'An error occurred while fetching contacts'}, 
@@ -84,7 +80,6 @@ def get_contacts(request):
 
 @login_required
 def get_messages(request, user_id):
-    """Get message history with a specific user"""
     other_user = get_object_or_404(User, userId=user_id)
     messages = Message.objects.filter(
         (Q(sender=request.user) & Q(recipient=other_user)) |
@@ -92,11 +87,12 @@ def get_messages(request, user_id):
     ).order_by('timestamp')
 
     messages_data = [{
-        'id': msg.id,  # Add this line
+        'id': msg.id,
         'content': msg.content,
         'sender_id': str(msg.sender.userId),
+        'sender_name': f"{msg.sender.firstname} {msg.sender.lastname}",  # Add sender's name
         'timestamp': localtime(msg.timestamp).strftime('%I:%M %p'),
-        'is_unsent': msg.is_unsent  # Add this line
+        'is_unsent': msg.is_unsent
     } for msg in messages]
 
     return JsonResponse({'messages': messages_data})
@@ -165,12 +161,37 @@ def unsend_message(request, message_id):
         message = Message.objects.get(id=message_id, sender=request.user)
         message.is_unsent = True
         message.save()
-        return JsonResponse({'status': 'success'})
+        return JsonResponse({
+            'status': 'success',
+            'message_id': message_id,
+            'sender_name': f"{message.sender.firstname} {message.sender.lastname}"
+        })
     except Message.DoesNotExist:
         return JsonResponse({
             'status': 'error',
             'message': 'Message not found or you do not have permission to unsend it'
         }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
+@login_required
+@require_POST
+def delete_conversation(request, user_id):
+    try:
+        other_user = get_object_or_404(User, userId=user_id)
+        # Delete all messages between the two users
+        Message.objects.filter(
+            (Q(sender=request.user) & Q(recipient=other_user)) |
+            (Q(sender=other_user) & Q(recipient=request.user))
+        ).delete()
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Conversation deleted successfully'
+        })
     except Exception as e:
         return JsonResponse({
             'status': 'error',

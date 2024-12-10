@@ -24,6 +24,7 @@
     }
 </style>
 <body class="bg-gray-100">
+    {% csrf_token %}
     <!-- Navigation -->
     <nav class="bg-white shadow-md fixed top-0 w-full z-50 h-16">
         <div class="w-full px-4 flex justify-between items-center h-full">
@@ -88,21 +89,34 @@
                     <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                         <span class="text-gray-600 font-bold" id="contact-initial"></span>
                     </div>
-                    <div class="ml-3">
+                    <div class="ml-3 flex-1">
                         <h3 class="font-semibold" id="contact-name">Select a conversation</h3>
                         <p class="text-sm text-gray-500" id="contact-status"></p>
+                    </div>
+                    <!-- Add the three-dot menu -->
+                    <div class="relative">
+                        <button id="chat-options-btn" class="p-2 hover:bg-gray-100 rounded-full" onclick="toggleChatOptions(event)">
+                            <i class="fas fa-ellipsis-v text-gray-600"></i>
+                        </button>
+                        <!-- Chat options menu -->
+                        <div id="chat-options-menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                            <button class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center text-red-500" onclick="deleteConversation()">
+                                <i class="fas fa-trash mr-2"></i> Delete Conversation
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Messages Area -->
+             
             <div class="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar" id="messages-container">
                 <!-- Messages will be dynamically inserted here -->
             </div>
 
             <!-- Message Input -->
             <div class="p-4 border-t border-gray-200">
-                <form id="message-form" class="flex items-end space-x-4">
+                <form id="message-form" data-url="{% url 'unsend_message' 0 %}" class="flex items-end space-x-4">
                     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                     <div class="flex-1 relative">
                         <textarea id="message-input" 
@@ -330,76 +344,77 @@
         
 
         // Function to load messages
-        function loadMessages(userId) {
+function loadMessages(userId) {
+    fetch(`/chat/messages/${userId}/`)
+        .then(response => response.json())
+        .then(data => {
+            const messagesContainer = document.getElementById('messages-container');
+            let currentDate = '';
             
-            fetch(`/chat/messages/${userId}/`)
-                .then(response => response.json())
-                .then(data => {
-                    const messagesContainer = document.getElementById('messages-container');
-                    let currentDate = '';
-                    
-                    messagesContainer.innerHTML = data.messages.map(message => {
-                        let messageHTML = '';
-                        const messageDate = new Date();
-                        const formattedDate = messageDate.toLocaleDateString('en-US', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
-                        });
-
-                        const contentWithBreaks = message.content.replace(/\n/g, '<br>');
-        
-                        // Add date separator if it's a different day
-                        if (formattedDate !== currentDate) {
-                            currentDate = formattedDate;
-                            messageHTML += `
-                                <div class="flex justify-center my-4">
-                                    <span class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                                        Today
-                                    </span>
-                                </div>
-                            `;
-                        }
-        
-                        if (!message.is_unsent) {
-                            const isSender = message.sender_id === currentUserId;
-                            messageHTML += `
-                                <div class="flex ${isSender ? 'justify-end' : 'justify-start'} mb-3 group relative"
-                                     data-message-id="${message.id}"
-                                     data-is-sender="${isSender}">
-                                    <div class="flex flex-col max-w-[350px] min-w-[50px] relative">
-                                        ${isSender ? `
-                                            <button class="absolute -left-8 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    onclick="showMessageOptions(event, ${message.id})" aria-label="Message options">
-                                                <i class="fas fa-ellipsis-v text-gray-500 hover:text-gray-700"></i>
-                                            </button>
-                                        ` : ''}
-                                        <div class="${isSender ? 'bg-[#0084ff] text-white' : 'bg-[#f0f0f0] text-black'} 
-                                            rounded-[20px] px-4 py-2 
-                                            ${isSender ? 'rounded-tr-[4px]' : 'rounded-tl-[4px]'}">
-                                            <p class="text-[15px] leading-[1.4] break-words" id="message-content-${message.id}">
-                                                ${contentWithBreaks}
-                                            </p>
-                                        </div>
-                                        <span class="text-xs text-gray-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity px-1">
-                                            ${message.timestamp}
-                                        </span>
-                                    </div>
-                                </div>
-                            `;
-                        } else {
-                            messageHTML += `
-                                <div class="flex justify-center my-2 mb-4">
-                                    <span class="text-xs text-gray-500 italic mb-4">You unsent a message</span>
-                                </div>
-                            `;
-                        }
-                        return messageHTML;
-                    }).join('');
-                    
+            messagesContainer.innerHTML = data.messages.map(message => {
+                let messageHTML = '';
+                const messageDate = new Date();
+                const formattedDate = messageDate.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
                 });
-        }
+
+                // Add date separator if it's a different day
+                if (formattedDate !== currentDate) {
+                    currentDate = formattedDate;
+                    messageHTML += `
+                        <div class="flex justify-center my-4">
+                            <span class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                                Today
+                            </span>
+                        </div>
+                    `;
+                }
+
+                const isSender = message.sender_id === currentUserId;
+
+                if (message.is_unsent) {
+                    // Display unsent message differently based on sender
+                    messageHTML += `
+                        <div class="flex justify-center my-2 mb-4">
+                            <span class="text-xs text-gray-500 italic mb-4">
+                                ${isSender ? 'You' : message.sender_name} unsent a message
+                            </span>
+                        </div>
+                    `;
+                } else {
+                    const contentWithBreaks = message.content.replace(/\n/g, '<br>');
+                    messageHTML += `
+                        <div class="flex ${isSender ? 'justify-end' : 'justify-start'} mb-3 group relative"
+                             data-message-id="${message.id}"
+                             data-is-sender="${isSender}">
+                            <div class="flex flex-col max-w-[350px] min-w-[50px] relative">
+                                ${isSender ? `
+                                    <button class="absolute -left-8 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onclick="showMessageOptions(event, ${message.id})" aria-label="Message options">
+                                        <i class="fas fa-ellipsis-v text-gray-500 hover:text-gray-700"></i>
+                                    </button>
+                                ` : ''}
+                                <div class="${isSender ? 'bg-[#0084ff] text-white' : 'bg-[#f0f0f0] text-black'} 
+                                    rounded-[20px] px-4 py-2 
+                                    ${isSender ? 'rounded-tr-[4px]' : 'rounded-tl-[4px]'}">
+                                    <p class="text-[15px] leading-[1.4] break-words" id="message-content-${message.id}">
+                                        ${contentWithBreaks}
+                                    </p>
+                                </div>
+                                <span class="text-xs text-gray-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity px-1">
+                                    ${message.timestamp}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }
+                return messageHTML;
+            }).join('');
+        });
+}
 
         function displayUnsentMessage(userName) {
             return `
@@ -413,15 +428,22 @@
         let currentMessageId = null;
         
         function showMessageOptions(event, messageId) {
+            event.preventDefault();
             event.stopPropagation();
             currentMessageId = messageId;
             const menu = document.getElementById('message-context-menu');
+            const rect = event.target.closest('button').getBoundingClientRect();
             menu.style.display = 'block';
-            const button = event.target.closest('button');
-            const rect = button.getBoundingClientRect();
             menu.style.left = `${rect.left - menu.offsetWidth - 5}px`;
             menu.style.top = `${rect.top}px`;
         }
+
+        document.querySelectorAll('[data-message-id]').forEach(message => {
+            const optionsButton = message.querySelector('button');
+            if (optionsButton) {
+                optionsButton.onclick = (e) => showMessageOptions(e, message.dataset.messageId);
+            }
+        });
         
         // Close menu when clicking outside
         document.addEventListener('click', function(event) {
@@ -457,24 +479,39 @@
             }
             document.getElementById('message-context-menu').style.display = 'none';
         }
+
+        function getCsrfToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
         
         function unsendMessage() {
             if (!currentMessageId || !confirm('Are you sure you want to unsend this message?')) return;
             
             fetch(`/chat/message/unsend/${currentMessageId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        loadMessages(selectedUserId);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Accept': 'application/json'  // Add this line
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    loadMessages(selectedUserId);
+                    refreshContacts();  // Add this to refresh the contacts list
+                } else {
+                    console.error('Error:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error unsending message:', error);
+                alert('Failed to unsend message. Please try again.');
+            });
             
             document.getElementById('message-context-menu').style.display = 'none';
         }
@@ -508,9 +545,12 @@
     
         // Function to refresh contacts list
         function refreshContacts() {
-            fetch('/chat/contacts/')
+            return fetch('/chat/contacts/')
                 .then(response => response.json())
-                .then(data => renderContacts(data.contacts))
+                .then(data => {
+                    renderContacts(data.contacts);
+                    return data;
+                })
                 .catch(error => {
                     console.error('Error refreshing contacts:', error);
                 });
@@ -538,8 +578,22 @@
     
         // Initial loading
         function initialize() {
-            refreshContacts();
+            refreshContacts().then(() => {
+                // Get all contacts
+                fetch('/chat/contacts/')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.contacts && data.contacts.length > 0) {
+                            // Get the first contact (most recent conversation)
+                            const mostRecentContact = data.contacts[0];
+                            // Automatically select this conversation
+                            selectChat(mostRecentContact.userId);
+                        }
+                    })
+                    .catch(error => console.error('Error loading initial contact:', error));
+            });
         }
+        
     
         // Poll for new messages
         function startPolling() {
@@ -592,6 +646,97 @@
                 messageInput.style.height = 'auto';
             }, 0);
         });
+
+
+        function renderMessage(message, currentUserId) {
+            const messageDiv = document.createElement('div');
+            const isOwnMessage = message.sender_id === currentUserId;
+            
+            messageDiv.className = `flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-4`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = `max-w-[70%] rounded-lg px-4 py-2 ${
+                isOwnMessage ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900'
+            }`;
+            
+            if (message.is_unsent) {
+                messageContent.innerHTML = `
+                    <div class="italic text-sm">
+                        ${message.sender_name} unsent a message
+                    </div>
+                `;
+            } else {
+                messageContent.innerHTML = `
+                    <div class="break-words">${message.content}</div>
+                    <div class="text-xs mt-1 ${isOwnMessage ? 'text-blue-100' : 'text-gray-500'}">
+                        ${message.timestamp}
+                    </div>
+                `;
+            }
+            
+            messageDiv.appendChild(messageContent);
+            return messageDiv;
+        }
+
+    </script>
+
+    <script>//a delete function jscript 
+        function toggleChatOptions(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('chat-options-menu');
+            menu.classList.toggle('hidden');
+        }
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('chat-options-menu');
+            const button = document.getElementById('chat-options-btn');
+            if (!menu.contains(event.target) && !button.contains(event.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+        
+        function deleteConversation() {
+            if (!selectedUserId || !confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) return;
+            
+            fetch(`/chat/conversation/delete/${selectedUserId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Accept': 'application/json'
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    // Clear the chat area
+                    document.getElementById('messages-container').innerHTML = '';
+                    document.getElementById('contact-name').textContent = 'Select a conversation';
+                    document.getElementById('contact-initial').textContent = '';
+                    document.getElementById('contact-status').textContent = '';
+                    
+                    // Reset selected user
+                    selectedUserId = null;
+                    
+                    // Refresh contacts list
+                    refreshContacts();
+                } else {
+                    console.error('Error:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting conversation:', error);
+                alert('Failed to delete conversation. Please try again.');
+            });
+            
+            // Hide the menu
+            document.getElementById('chat-options-menu').classList.add('hidden');
+        }
     </script>
 </body>
 </html>
