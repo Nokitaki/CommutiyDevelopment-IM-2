@@ -89,8 +89,11 @@
                     <i class="fas fa-book text-xl"></i>
                 </a>
                 <!-- New navigation items -->
-                <a href="#" class="text-gray-600 hover:text-gray-900">
+                <a href="{% url 'chat_home' %}" class="text-gray-600 hover:text-gray-900 relative">
                     <i class="fas fa-comments text-xl"></i>
+                    <span id="nav-unread-count" 
+                          class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center hidden">
+                    </span>
                 </a>
                 <a href="#" class="text-gray-600 hover:text-gray-900">
                     <i class="fas fa-tasks text-xl"></i>
@@ -867,6 +870,34 @@
                     .catch(error => console.error('Error deleting event:', error));
                 }
             }
+    </script>
+
+    <script>
+        function updateNavUnreadCount() {
+            fetch('/chat/unread-count/')
+                .then(response => response.json())
+                .then(data => {
+                    const unreadBadge = document.getElementById('nav-unread-count');
+                    if (unreadBadge) {  // Check if element exists
+                        if (data.unread_count > 0) {
+                            unreadBadge.textContent = data.unread_count;
+                            unreadBadge.classList.remove('hidden');
+                        } else {
+                            unreadBadge.classList.add('hidden');
+                        }
+                    }
+                })
+                .catch(error => console.error('Error updating unread count:', error));
+        }
+    
+        // Update unread count every 5 seconds
+        function startUnreadCountPolling() {
+            updateNavUnreadCount(); // Initial update
+            setInterval(updateNavUnreadCount, 5000);
+        }
+    
+        // Start polling when document is ready
+        document.addEventListener('DOMContentLoaded', startUnreadCountPolling);
     </script>
 
  

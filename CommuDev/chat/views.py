@@ -1,48 +1,139 @@
-#chat/views.py
-from django.shortcuts import render, get_object_or_404, redirect
+# chat/views.py
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.views.generic import ListView
+from django.http import JsonResponse
+from django.db.models import Q
 from .models import Message
-from .forms import MessageForm, MessageUpdateForm
+from users.models import User
+import json
+from datetime import datetime
+from django.views.decorators.http import require_POST
+from django.utils import timezone
+from django.utils.timezone import localtime
+
+@login_required
+def chat_home(request):
+    """Main chat interface view"""
+    # Get all users except the current user
+    all_users = User.objects.exclude(userId=request.user.userId).order_by('firstname')
+    return render(request, 'chat/home.html', {'all_users': all_users})
+
+@login_required
+def get_unread_count(request):
+    unread_count = Message.objects.filter(
+        recipient=request.user,
+        is_read=False
+    ).count()
+    return JsonResponse({'unread_count': unread_count})
+
+@login_required
+def get_user_contacts(user):
+    """Get all users who have exchanged messages with the current user"""
+    sent_to = Message.objects.filter(sender=user).values_list('recipient', flat=True)
+    received_from = Message.objects.filter(recipient=user).values_list('sender', flat=True)
+    contact_ids = set(list(sent_to) + list(received_from))
+    return User.objects.filter(userId__in=contact_ids).order_by('firstname')
+
+# chat/views.py
+
+@login_required
+def get_contacts(request):
+    try:
+        messages = Message.objects.filter(
+            Q(sender=request.user) | Q(recipient=request.user)
+        ).select_related('sender', 'recipient').order_by('-timestamp')
+        
+        # Use a dictionary to keep track of the latest message for each contact
+        contacts_dict = {}
+        
+        for message in messages:
+            # Determine if the contact is the sender or recipient
+            contact = message.recipient if message.sender == request.user else message.sender
+            contact_id = str(contact.userId)
+            
+            # Only process if this is a new contact or a more recent message
+            if contact_id not in contacts_dict:
+                # Get unread count for this contact
+                unread_count = Message.objects.filter(
+                    sender=contact,
+                    recipient=request.user,
+                    is_read=False
+                ).count()
+                
+                contacts_dict[contact_id] = {
+                    'userId': contact_id,
+                    'firstname': contact.firstname,
+                    'lastname': contact.lastname,
+                    'lastMessage': message.content,
+                    'lastMessageTime': localtime(message.timestamp).strftime('%I:%M %p'),
+                    'unreadCount': unread_count
+                }
+        
+        # Convert dictionary values to list
+        contacts_list = list(contacts_dict.values())
+        
+        return JsonResponse({'contacts': contacts_list})
+        
+    except Exception as e:
+        # Log the error (you should set up proper logging)
+        print(f"Error in get_contacts: {str(e)}")
+        return JsonResponse(
+            {'error': 'An error occurred while fetching contacts'}, 
+            status=500
+        )
+
+@login_required
+def get_messages(request, user_id):
+    """Get message history with a specific user"""
+    other_user = get_object_or_404(User, userId=user_id)
+    messages = Message.objects.filter(
+        (Q(sender=request.user) & Q(recipient=other_user)) |
+        Q(sender=other_user) & Q(recipient=request.user)
+    ).order_by('timestamp')
+
+    messages_data = [{
+        'content': msg.content,
+        'sender_id': str(msg.sender.userId),
+        'timestamp': localtime(msg.timestamp).strftime('%I:%M %p'),
+    } for msg in messages]
+
+    return JsonResponse({'messages': messages_data})
 
 @login_required
 def send_message(request):
-    if request.method == 'POST':
-        form = MessageForm(request.POST)
-        if form.is_valid():
-            message = form.save(commit=False)
-            message.sender = request.user
-            message.save()
-            return redirect('message_list')
-    else:
-        form = MessageForm()
-    return render(request, 'chat/send_message.html', {'form': form})
+    """Send a new message"""
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
+    try:
+        data = json.loads(request.body)
+        recipient = get_object_or_404(User, userId=data['recipient_id'])
+        
+        message = Message.objects.create(
+            sender=request.user,
+            recipient=recipient,
+            content=data['content']
+        )
+
+        return JsonResponse({
+            'status': 'success',
+            'message': {
+                'id': message.id,
+                'content': message.content,
+                'timestamp': message.timestamp.strftime('%I:%M %p'),
+            }
+        })
+    except (json.JSONDecodeError, KeyError) as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
 @login_required
-def edit_message(request, pk):
-    message = get_object_or_404(Message, pk=pk, sender=request.user)
-    if request.method == 'POST':
-        form = MessageUpdateForm(request.POST, instance=message)
-        if form.is_valid():
-            form.save()
-            return redirect('message_list')
-    else:
-        form = MessageUpdateForm(instance=message)
-    return render(request, 'chat/edit_message.html', {'form': form})
-
-@login_required
-def delete_message(request, pk):
-    message = get_object_or_404(Message, pk=pk, sender=request.user)
-    if request.method == 'POST':
-        message.delete()
-        return redirect('message_list')
-    return render(request, 'chat/delete_message.html', {'message': message})
-
-class MessageListView(ListView):
-    model = Message
-    template_name = 'chat/message_list.html'
-    context_object_name = 'messages'
-
-    def get_queryset(self):
-        # Show messages sent or received by the logged-in user
-        return Message.objects.filter(sender=self.request.user) | Message.objects.filter(recipient=self.request.user)
+@require_POST
+def mark_messages_read(request, user_id):
+    Message.objects.filter(
+        sender_id=user_id,
+        recipient=request.user,
+        is_read=False
+    ).update(is_read=True)
+    return JsonResponse({'status': 'success'})

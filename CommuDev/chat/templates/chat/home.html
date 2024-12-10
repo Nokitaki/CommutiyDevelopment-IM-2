@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CommuDev Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md fixed top-0 w-full z-50 h-16">
+        <div class="w-full px-4 flex justify-between items-center h-full">
+            <div class="flex-shrink-0">
+                <h1 class="text-2xl font-bold text-gray-900">CommuDev</h1>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="{% url 'home' %}" class="text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-home text-xl"></i>
+                </a>
+                <a href="{% url 'resource_home' %}" class="text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-book text-xl"></i>
+                </a>
+                <a href="{% url 'chat_home' %}" class="text-gray-600 hover:text-gray-900 relative">
+                    <i class="fas fa-comments text-xl"></i>
+                    <span id="nav-unread-count" 
+                          class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center hidden">
+                    </span>
+                </a>                
+                <a href="#" class="text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-tasks text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-gift text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-comment-dots text-xl"></i>
+                </a>
+                <a href="{% url 'profile' %}" class="text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-user-circle text-xl"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="flex h-[calc(100vh-4rem)] bg-gray-100 mt-16">
+        <!-- Left Sidebar - Conversations -->
+        <div class="w-1/4 bg-white border-r border-gray-200">
+            <!-- Search Bar -->
+            <div class="p-4 border-b border-gray-200">
+                <div class="relative">
+                    <input type="text" placeholder="Search conversations" 
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                    <span class="absolute left-3 top-2.5 text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Conversations List -->
+            <div class="overflow-y-auto h-[calc(100vh-8rem)]" id="contacts-list">
+                <!-- Contact items will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Middle - Chat Area -->
+        <div class="flex-1 flex flex-col bg-white border-r border-gray-200">
+            <!-- Chat Header -->
+            <div class="p-4 border-b border-gray-200 flex items-center">
+                <div id="selected-contact" class="flex items-center flex-1">
+                    <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span class="text-gray-600 font-bold" id="contact-initial"></span>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="font-semibold" id="contact-name">Select a conversation</h3>
+                        <p class="text-sm text-gray-500" id="contact-status"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-1" id="messages-container">
+                <!-- Messages will be dynamically inserted here -->
+            </div>
+
+            <!-- Message Input -->
+            <div class="p-4 border-t border-gray-200">
+                <form id="message-form" class="flex items-end space-x-4">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                    <div class="flex-1 relative">
+                        <textarea id="message-input" 
+                            class="w-full resize-none overflow-hidden rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 px-4 py-2 max-h-32 min-h-[2.5rem]"
+                            rows="1"
+                            placeholder="Type your message..."></textarea>
+                    </div>
+                    <button type="submit" 
+                        class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none h-10">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - All Users -->
+        <div class="w-1/5 bg-white">
+            <!-- Users Search -->
+            <div class="p-4 border-b border-gray-200">
+                <div class="relative">
+                    <input type="text" 
+                        id="users-search"
+                        placeholder="Search users" 
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                    <span class="absolute left-3 top-2.5 text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Users List -->
+            <div class="overflow-y-auto h-[calc(100vh-8rem)]" id="users-list">
+                {% for user in all_users %}
+                <div class="user-item p-4 border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                     onclick="selectChat('{{ user.userId }}')"
+                     data-user-name="{{ user.firstname }} {{ user.lastname }}">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
+                            <span class="text-gray-600 font-bold">{{ user.firstname|first }}</span>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <h3 class="text-sm font-semibold">{{ user.firstname }} {{ user.lastname }}</h3>
+                            <p class="text-sm text-gray-500">{{ user.employmentStatus }}</p>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-comment-dots"></i>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let selectedUserId = null;
+        const currentUserId = '{{ request.user.userId }}';
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+        // Initialize search functionality for users (right sidebar)
+        document.getElementById('users-search').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const userItems = document.querySelectorAll('.user-item');
+            
+            userItems.forEach(item => {
+                const userName = item.getAttribute('data-user-name').toLowerCase();
+                if (userName.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    
+        // Initialize search functionality for conversations (left sidebar)
+document.querySelector('input[placeholder="Search conversations"]').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const contactItems = document.querySelectorAll('.contact-item');
+    
+    contactItems.forEach(item => {
+        // Get the name from the div structure
+        const nameElement = item.querySelector('h3');
+        // Get the message preview from the p element inside contact-item
+        const messageElement = item.querySelector('p:not(.text-gray-400)'); // Exclude timestamp
+        
+        let shouldShow = false;
+        
+        // Check name
+        if (nameElement) {
+            const name = nameElement.textContent.toLowerCase().trim();
+            if (name.includes(searchTerm)) {
+                shouldShow = true;
+            }
+        }
+        
+        // Check message content
+        if (messageElement && !shouldShow) {
+            const messageContent = messageElement.textContent.toLowerCase().trim();
+            if (messageContent !== 'start a conversation' && messageContent.includes(searchTerm)) {
+                shouldShow = true;
+            }
+        }
+        
+        // Show/hide based on result
+        item.style.display = shouldShow ? '' : 'none';
+    });
+});
+            
+        // Function to format timestamp
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+    
+        // Function to scroll messages to bottom
+        function scrollToBottom() {
+            const messagesContainer = document.getElementById('messages-container');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    
+        // Function to render contacts with message preview
+        function renderContacts(contacts) {
+            const contactsList = document.getElementById('contacts-list');
+            contactsList.innerHTML = contacts.map(contact => `
+                <div class="contact-item p-4 border-b border-gray-200 hover:bg-gray-50 cursor-pointer 
+                          ${contact.unreadCount > 0 ? 'bg-blue-50' : ''} 
+                          ${selectedUserId === contact.userId ? 'bg-gray-100' : ''}"
+                    onclick="selectChat('${contact.userId}')"
+                    data-user-name="${contact.firstname} ${contact.lastname}">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 flex-shrink-0 bg-gray-300 rounded-full flex items-center justify-center">
+                            <span class="text-gray-600 font-bold">${contact.firstname[0]}</span>
+                        </div>
+                        <div class="flex-1 min-w-0"> <!-- Add min-w-0 to enable text truncation -->
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-sm font-semibold truncate">${contact.firstname} ${contact.lastname}</h3>
+                                <div class="flex items-center gap-2 flex-shrink-0">
+                                    ${contact.unreadCount > 0 ? `
+                                        <span class="bg-blue-500 text-white text-xs rounded-full px-2 py-1">
+                                            ${contact.unreadCount}
+                                        </span>
+                                    ` : ''}
+                                    <span class="text-xs text-gray-400 whitespace-nowrap">${contact.lastMessageTime || ''}</span>
+                                </div>
+                            </div>
+                            <p class="text-sm ${contact.unreadCount > 0 ? 'font-semibold text-gray-900' : 'text-gray-500'} truncate">
+                                ${contact.lastMessage || 'Start a conversation'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Function to update unread count in navigation
+        function updateNavUnreadCount() {
+            fetch('/chat/unread-count/')
+                .then(response => response.json())
+                .then(data => {
+                    const unreadBadge = document.getElementById('nav-unread-count');
+                    if (data.unread_count > 0) {
+                        unreadBadge.textContent = data.unread_count;
+                        unreadBadge.classList.remove('hidden');
+                    } else {
+                        unreadBadge.classList.add('hidden');
+                    }
+                });
+        }
+
+        // Function to mark messages as read
+            function markMessagesAsRead(userId) {
+                fetch(`/chat/mark-read/${userId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    }
+                }).then(() => {
+                    updateNavUnreadCount();
+                    refreshContacts();
+                });
+            }
+    
+        // Function to select a chat
+        function selectChat(userId) {
+            selectedUserId = userId;
+            
+            // Try to find the user from either the users list or contacts list
+            let userItem = document.querySelector(`.user-item[onclick="selectChat('${userId}')"]`) ||
+                          document.querySelector(`.contact-item[onclick="selectChat('${userId}')"]`);
+            
+            if (userItem) {
+
+                markMessagesAsRead(userId);
+
+                let nameElement = userItem.querySelector('h3');
+                let name = nameElement ? nameElement.textContent.trim() : '';
+                
+                // Update chat header
+                document.getElementById('contact-name').textContent = name;
+                document.getElementById('contact-initial').textContent = name.charAt(0);
+                document.getElementById('contact-status').textContent = 'Online';
+                
+                // Add active state to selected chat
+                document.querySelectorAll('.contact-item, .user-item').forEach(item => {
+                    item.classList.remove('bg-gray-100');
+                });
+                userItem.classList.add('bg-gray-100');
+            }
+            
+            loadMessages(userId);
+        }
+    
+        // Function to load messages
+        function loadMessages(userId) {
+            fetch(`/chat/messages/${userId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const messagesContainer = document.getElementById('messages-container');
+                    let currentDate = '';
+                    
+                    messagesContainer.innerHTML = data.messages.map(message => {
+                        let messageHTML = '';
+                        // Use the current timestamp for the date separator
+                        const today = new Date();
+                        const formattedDate = today.toLocaleDateString('en-US', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        });
+        
+                        // Add date separator if it's a different day
+                        if (formattedDate !== currentDate) {
+                            currentDate = formattedDate;
+                            messageHTML += `
+                                <div class="flex justify-center my-4">
+                                    <span class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                                        Today
+                                    </span>
+                                </div>
+                            `;
+                        }
+        
+                        messageHTML += `
+                            <div class="flex ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'} mb-2 group">
+                                <div class="flex flex-col ${message.sender_id === currentUserId ? 'items-end' : 'items-start'}">
+                                    <div class="flex">
+                                        <div class="inline-block max-w-[300px] ${message.sender_id === currentUserId ? 'bg-blue-500 text-white' : 'bg-gray-100'} 
+                                            rounded-2xl px-4 py-2 ${message.sender_id === currentUserId ? 'rounded-tr-none' : 'rounded-tl-none'}">
+                                            <p class="text-sm whitespace-pre-wrap break-words">${message.content}</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs text-gray-500 mt-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        ${message.timestamp}
+                                    </span>
+                                </div>
+                            </div>
+                        `;
+                        return messageHTML;
+                    }).join('');
+                    scrollToBottom();
+                })
+        }
+    
+        // Function to send message
+        function sendMessage(content) {
+            if (!selectedUserId || !content.trim()) return;
+    
+            fetch('/chat/send/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    recipient_id: selectedUserId,
+                    content: content.trim()
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    loadMessages(selectedUserId);
+                    refreshContacts();
+                }
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+            });
+        }
+    
+        // Function to refresh contacts list
+        function refreshContacts() {
+            fetch('/chat/contacts/')
+                .then(response => response.json())
+                .then(data => renderContacts(data.contacts))
+                .catch(error => {
+                    console.error('Error refreshing contacts:', error);
+                });
+        }
+    
+        // Handle message form submission
+        document.getElementById('message-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = document.getElementById('message-input');
+            const content = input.value;
+            
+            if (content.trim()) {
+                sendMessage(content);
+                input.value = '';
+            }
+        });
+    
+        // Handle enter key in message input
+        document.getElementById('message-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.getElementById('message-form').dispatchEvent(new Event('submit'));
+            }
+        });
+    
+        // Initial loading
+        function initialize() {
+            refreshContacts();
+        }
+    
+        // Poll for new messages
+        function startPolling() {
+            setInterval(() => {
+                if (selectedUserId) {
+                    loadMessages(selectedUserId);
+                }
+                refreshContacts();
+                updateNavUnreadCount();
+            }, 5000);
+        }
+    
+        // Initialize when page loads
+        initialize();
+        startPolling();
+
+
+        // Auto-resize message input
+        const messageInput = document.getElementById('message-input');
+
+        function adjustTextareaHeight() {
+            // Reset height to auto to get the correct scrollHeight
+            messageInput.style.height = 'auto';
+            
+            // Set new height based on scrollHeight
+            const newHeight = Math.min(messageInput.scrollHeight, 128); // 128px max height (32 * 4)
+            messageInput.style.height = `${newHeight}px`;
+        }
+
+        // Add event listeners for input resizing
+        messageInput.addEventListener('input', adjustTextareaHeight);
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.getElementById('message-form').dispatchEvent(new Event('submit'));
+                // Reset height after sending
+                setTimeout(() => {
+                    messageInput.style.height = 'auto';
+                }, 0);
+            }
+            // Allow new line with Shift + Enter
+            if (e.key === 'Enter' && e.shiftKey) {
+                adjustTextareaHeight();
+            }
+        });
+
+        // Reset input height when form is submitted
+        document.getElementById('message-form').addEventListener('submit', function(e) {
+            setTimeout(() => {
+                messageInput.style.height = 'auto';
+            }, 0);
+        });
+    </script>
+</body>
+</html>
