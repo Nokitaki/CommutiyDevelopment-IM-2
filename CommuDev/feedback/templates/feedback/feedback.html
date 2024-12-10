@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CommuDev - Feedback</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">   
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation Bar -->
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md fixed top-0 w-full z-50 h-16">
+        <div class="w-full px-4 flex justify-between items-center h-full">
+            <div class="flex-shrink-0">
+                <h1 class="text-2xl font-bold text-gray-900">CommuDev</h1>
+            </div>
+            <div class="flex items-center space-x-8">
+                <a href="{% url 'home' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-home text-xl"></i>
+                    <span class="text-xs mt-1">Home</span>
+                </a>
+                <a href="{% url 'resource_home' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-book text-xl"></i>
+                    <span class="text-xs mt-1">Resources</span>
+                </a>
+                <a href="{% url 'chat_home' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center relative">
+                    <i class="fas fa-comments text-xl"></i>
+                    <span class="text-xs mt-1">Chat</span>
+                    <span id="nav-unread-count" 
+                          class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center hidden">
+                    </span>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-tasks text-xl"></i>
+                    <span class="text-xs mt-1">Tasks</span>
+                </a>
+                <a href="{% url 'reward-list' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-gift text-xl"></i>
+                    <span class="text-xs mt-1">Rewards</span>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-flag text-xl"></i>
+                    <span class="text-xs mt-1">Feedbacks</span>
+                </a>
+                <a href="{% url 'profile' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-user-circle text-xl"></i>
+                    <span class="text-xs mt-1">Profile</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8 mt-20">
+        <!-- Feedback Header -->
+        <div class="mb-8 ml-6">
+            <h2 class="text-3xl font-bold text-gray-900">Feedback Center</h2>
+            <p class="text-gray-600 mt-2">Help us improve by sharing your thoughts and suggestions</p>
+        </div>
+
+        <!-- Success Messages -->
+        {% if messages %}
+        <div id="success-messages">
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-md bg-green-100 text-green-700">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+       
+
+        <!-- Feedback Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 ml-6 mr-6">
+            <!-- Create Feedback Card -->
+            <div class="bg-white rounded-lg shadow-lg p-6 transform transition-all duration-300 hover:shadow-xl">
+                <button onclick="openCreateModal()" class="w-full text-left">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-gray-900">Share Feedback</h3>
+                        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                    </div>
+                    <p class="text-gray-600">Share your ideas, report bugs, or suggest new features</p>
+                </button>
+            </div>
+
+            <!-- Feedback Stats -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-semibold text-gray-900 mb-4">Your Feedback</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Total Submitted</span>
+                        <span class="text-gray-900 font-semibold">{{ feedback_stats.total }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Pending</span>
+                        <span class="text-gray-900 font-semibold">{{ feedback_stats.pending }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">In Progress</span>
+                        <span class="text-gray-900 font-semibold">{{ feedback_stats.in_progress }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Resolved</span>
+                        <span class="text-gray-900 font-semibold">{{ feedback_stats.resolved }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Tips -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-semibold text-gray-900 mb-4">Tips for Great Feedback</h3>
+                <ul class="space-y-3 text-gray-600">
+                    <li class="flex items-center">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Be specific and detailed
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Include steps to reproduce bugs
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Suggest potential solutions
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Feedback List -->
+        <div class="mt-12 ml-6 mr-6">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6">Your Feedback History</h3>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                                {% if not user.is_staff %}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                {% endif %}
+                                <!-- Show User column only for staff -->
+                                {% if user.is_staff %}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                                {% endif %}
+                                
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                {% if not user.is_staff %}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                {% endif %}
+                                {% if user.is_staff %}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for feedback in feedbacks %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        {% if feedback.feedback_type == 'bug' %}bg-red-100 text-red-800
+                                        {% elif feedback.feedback_type == 'feature' %}bg-blue-100 text-blue-800
+                                        {% elif feedback.feedback_type == 'improvement' %}bg-purple-100 text-purple-800
+                                        {% else %}bg-green-100 text-green-800{% endif %}">
+                                        {{ feedback.get_feedback_type_display }}
+                                    </span>
+                                </td>
+
+                                <!-- Subject -->
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900 font-semibold">{{ feedback.subject }}</div>
+                                    <div class="text-sm text-gray-500">{{ feedback.description|truncatechars:100 }}</div>
+                                </td>
+
+                                <!--Status-->
+                                {% if not user.is_staff %}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                        {% if feedback.status == 'resolved' %}bg-green-100 text-green-800
+                                        {% elif feedback.status == 'in_progress' %}bg-blue-100 text-blue-800
+                                        {% elif feedback.status == 'closed' %}bg-gray-100 text-gray-800
+                                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                        {{ feedback.get_status_display }}
+                                    </span>
+                                </td>
+                                {% endif %}
+
+
+
+                                <!-- Show username for staff -->
+                                {% if user.is_staff %}
+                                <td class="px-6 py-4">
+                                    <span class="text-sm text-gray-900">{{ feedback.user.firstname }} {{ feedback.user.lastname }}</span>
+                                </td>
+                                {% endif %}
+                                <!-- Date -->
+                                <td class="px-6 py-4 text-sm text-gray-500">
+                                    {{ feedback.date_submitted|date:"F j, Y" }}
+                                </td>
+
+                                <!-- Actions column -->
+                                <td class="px-6 py-4 text-sm font-medium">
+                                    {% if user.is_staff %}
+                                        <!-- Admin only sees the current status -->
+                                        <select 
+                                            onchange="updateFeedback('{{ feedback.feedback_id }}', this.value)"
+                                            class="w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm"
+                                        >
+                                            <option value="pending" {% if feedback.status == 'pending' %}selected{% endif %}>Pending</option>
+                                            <option value="in_progress" {% if feedback.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                            <option value="resolved" {% if feedback.status == 'resolved' %}selected{% endif %}>Resolved</option>
+                                            <option value="closed" {% if feedback.status == 'closed' %}selected{% endif %}>Closed</option>
+                                        </select>
+                                    {% else %}
+                                        {% if feedback.user == request.user %}
+                                            <!-- Regular users can edit their own feedback -->
+                                            <button onclick="openEditModal('{{ feedback.feedback_id }}', '{{ feedback.feedback_type }}', '{{ feedback.subject }}', '{{ feedback.description }}')" 
+                                                    class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                                            <button onclick="openDeleteModal('{{ feedback.feedback_id }}')" 
+                                                    class="text-red-600 hover:text-red-900">Delete</button>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Feedback Modal -->
+    <div id="createFeedbackModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg w-full max-w-md">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Create New Feedback</h3>
+                    <form method="POST" action="{% url 'feedback:feedback-create' %}">
+                        {% csrf_token %}
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Feedback Type</label>
+                                {{ form.feedback_type }}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Subject</label>
+                                {{ form.subject }}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Description</label>
+                                {{ form.description }}
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button type="button" onclick="closeModal('createFeedbackModal')" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                                Submit Feedback
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add this modal HTML before the closing body tag -->
+<div id="editFeedbackModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg w-[800px] min-h-[500px]">
+            <div class="p-6 h-full">
+                <h3 class="text-xl font-semibold text-gray-900 mb-4">Edit Feedback</h3>
+                <form id="editFeedbackForm" method="POST" class="space-y-4 h-[calc(100%-2rem)]">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Feedback Type</label>
+                        {{ form.feedback_type }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Subject</label>
+                        {{ form.subject }}
+                    </div>
+                    <div class="flex-grow">
+                        <label class="block text-sm font-medium text-gray-700">Description</label>
+                    
+                        {{ form.description }}
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200" onclick="closeEditModal()">Cancel</button>
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Update Feedback</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+    <script>
+        function openCreateModal() {
+            document.getElementById('createFeedbackModal').classList.remove('hidden');
+        }
+
+        function openDeleteModal(feedbackId) {
+            const deleteModal = document.getElementById('deleteFeedbackModal');
+            const deleteForm = document.getElementById('deleteFeedbackForm');
+            // Change this
+            deleteForm.action = `/feedback/delete/${feedbackId}/`;
+            
+            // To this
+            deleteForm.action = `/feedback/delete/${feedbackId}/`;  // This can stay the same since it's a direct path
+            deleteModal.classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = [
+                document.getElementById('createFeedbackModal'),
+                document.getElementById('deleteFeedbackModal')
+            ];
+
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
+
+        // Escape key closes modals
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modals = [
+                    document.getElementById('createFeedbackModal'),
+                    document.getElementById('deleteFeedbackModal')
+                ];
+
+                modals.forEach(modal => {
+                    if (!modal.classList.contains('hidden')) {
+                        modal.classList.add('hidden');
+                    }
+                });
+            }
+        });
+
+        // Form validation
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(event) {
+                const requiredFields = form.querySelectorAll('[required]');
+                let isValid = true;
+
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        isValid = false;
+                        field.classList.add('border-red-500');
+                        
+                        // Add error message if it doesn't exist
+                        if (!field.nextElementSibling?.classList.contains('error-message')) {
+                            const errorMessage = document.createElement('p');
+                            errorMessage.classList.add('error-message', 'text-red-500', 'text-sm', 'mt-1');
+                            errorMessage.textContent = 'This field is required';
+                            field.parentNode.insertBefore(errorMessage, field.nextSibling);
+                        }
+                    } else {
+                        field.classList.remove('border-red-500');
+                        const errorMessage = field.nextElementSibling;
+                        if (errorMessage?.classList.contains('error-message')) {
+                            errorMessage.remove();
+                        }
+                    }
+                });
+
+                if (!isValid) {
+                    event.preventDefault();
+                }
+            });
+        });
+
+        // Remove error styling on input
+        document.querySelectorAll('input, textarea, select').forEach(field => {
+            field.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    this.classList.remove('border-red-500');
+                    const errorMessage = this.nextElementSibling;
+                    if (errorMessage?.classList.contains('error-message')) {
+                        errorMessage.remove();
+                    }
+                }
+            });
+        });
+
+        // Feedback type color indicator
+        document.querySelectorAll('select[name="feedback_type"]').forEach(select => {
+            select.addEventListener('change', function() {
+                const option = this.options[this.selectedIndex];
+                const value = option.value;
+                let bgColor = 'bg-gray-100';
+                
+                switch(value) {
+                    case 'bug':
+                        bgColor = 'bg-red-100';
+                        break;
+                    case 'feature':
+                        bgColor = 'bg-blue-100';
+                        break;
+                    case 'improvement':
+                        bgColor = 'bg-purple-100';
+                        break;
+                    case 'general':
+                        bgColor = 'bg-green-100';
+                        break;
+                }
+
+                // Remove all bg colors and add new one
+                this.classList.remove('bg-gray-100', 'bg-red-100', 'bg-blue-100', 'bg-purple-100', 'bg-green-100');
+                this.classList.add(bgColor);
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.messages .message');
+            
+            messages.forEach(message => {
+                if (message.classList.contains('error')) {
+                    // Create a more detailed error display
+                    const errorContainer = document.createElement('div');
+                    errorContainer.classList.add('bg-red-100', 'border', 'border-red-400', 'text-red-700', 'px-4', 'py-3', 'rounded', 'relative', 'mb-4');
+                    errorContainer.innerHTML = `
+                        <strong class="font-bold">Submission Error!</strong>
+                        <span class="block sm:inline">${message.textContent}</span>
+                        <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                            <svg onclick="this.closest('.messages').remove()" class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+                        </span>
+                    `;
+                    
+                    // Insert the new error container
+                    message.closest('.messages').appendChild(errorContainer);
+                    message.remove();
+                }
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const successMessagesContainer = document.getElementById('success-messages');
+            
+            if (successMessagesContainer) {
+                // Remove messages after 5 seconds (5000 milliseconds)
+                setTimeout(() => {
+                    successMessagesContainer.innerHTML = '';
+                }, 5000);
+        
+                // Alternative approach with fade-out effect
+                const messageElements = successMessagesContainer.children;
+                Array.from(messageElements).forEach(element => {
+                    setTimeout(() => {
+                        element.classList.add('transition', 'duration-500', 'opacity-0');
+                        setTimeout(() => {
+                            element.remove();
+                        }, 500);
+                    }, 5000);
+                });
+            }
+        });
+        </script>
+
+        <script>
+            const editModal = document.getElementById('editFeedbackModal');
+            const editForm = document.getElementById('editFeedbackForm');
+
+            function openEditModal(feedbackId, type, subject, description) {
+                // Set the form action URL
+                editForm.action = `/feedback/edit/${feedbackId}/`;
+                
+                // Set the form values
+                editForm.querySelector('[name="feedback_type"]').value = type;
+                editForm.querySelector('[name="subject"]').value = subject;
+                editForm.querySelector('[name="description"]').value = description;
+                
+                // Show the modal
+                editModal.classList.remove('hidden');
+            }
+
+            function closeEditModal() {
+                editModal.classList.add('hidden');
+            }
+
+            // Close modal if clicking outside
+            editModal.addEventListener('click', function(e) {
+                if (e.target === editModal) {
+                    closeEditModal();
+                }
+            });
+        </script>
+
+        <script>
+            function updateFeedback(feedbackId, newStatus) {
+                // Show confirmation dialog
+                if (!confirm('Are you sure you want to update this feedback status?')) {
+                    return;
+                }
+            
+                fetch(`/feedback/update-status/${feedbackId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        status: newStatus
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Create success message
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = 'fixed top-4 right-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-lg z-50';
+                        messageDiv.innerHTML = 'Status updated successfully';
+                        document.body.appendChild(messageDiv);
+                        
+                        // Remove message after 3 seconds
+                        setTimeout(() => {
+                            messageDiv.remove();
+                        }, 3000);
+            
+                        // Optionally refresh the page to show updated status
+                        // window.location.reload();
+                    } else {
+                        alert('Failed to update status: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating status: ' + error);
+                });
+            }
+            
+            // Helper function to get CSRF token
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        </script>
+</body>
+</html>

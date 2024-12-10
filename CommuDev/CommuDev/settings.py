@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'calendar_events',
 
 ]
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 AUTH_USER_MODEL = 'users.User'
 

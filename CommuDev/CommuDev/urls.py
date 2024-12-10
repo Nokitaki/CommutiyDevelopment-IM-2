@@ -27,7 +27,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('news/', include('newsfeed.urls')), 
     path('resource/', include('resourcehub.urls')),
-    path("feedback/", include("feedback.urls")),
+    path('feedback/', include('feedback.urls', namespace='feedback')),
     path("rewards/", include("rewards.urls")),
     path('users/', include('users.urls')),  # Changed from /login to users/
     path('tasks/', include('taskManager.urls')), 
