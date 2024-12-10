@@ -81,35 +81,42 @@
             <div class="flex-shrink-0">
                 <h1 class="text-2xl font-bold text-gray-900">CommuDev</h1>
             </div>
-            <div class="flex items-center space-x-6">
-                <a href="{% url 'home' %}" class="text-gray-600 hover:text-gray-900">
+            <div class="flex items-center space-x-8">
+                <a href="{% url 'home' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
                     <i class="fas fa-home text-xl"></i>
+                    <span class="text-xs mt-1">Home</span>
                 </a>
-                <a href="{% url 'resource_home' %}" class="text-gray-600 hover:text-gray-900">
+                <a href="{% url 'resource_home' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
                     <i class="fas fa-book text-xl"></i>
+                    <span class="text-xs mt-1">Resources</span>
                 </a>
-                <!-- New navigation items -->
-                <a href="{% url 'chat_home' %}" class="text-gray-600 hover:text-gray-900 relative">
+                <a href="{% url 'chat_home' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center relative">
                     <i class="fas fa-comments text-xl"></i>
+                    <span class="text-xs mt-1">Chat</span>
                     <span id="nav-unread-count" 
                           class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center hidden">
                     </span>
                 </a>
-                <a href="#" class="text-gray-600 hover:text-gray-900">
+                <a href="#" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
                     <i class="fas fa-tasks text-xl"></i>
+                    <span class="text-xs mt-1">Tasks</span>
                 </a>
-                <a href="{% url 'reward-list' %}" class="text-gray-600 hover:text-gray-900">
+                <a href="{% url 'reward-list' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
                     <i class="fas fa-gift text-xl"></i>
+                    <span class="text-xs mt-1">Rewards</span>
                 </a>
-                <a href="#" class="text-gray-600 hover:text-gray-900">
+                <a href="#" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
                     <i class="fas fa-comment-dots text-xl"></i>
+                    <span class="text-xs mt-1">Feedbacks</span>
                 </a>
-                <a href="{% url 'profile' %}" class="text-gray-600 hover:text-gray-900">
+                <a href="{% url 'profile' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
                     <i class="fas fa-user-circle text-xl"></i>
+                    <span class="text-xs mt-1">Profile</span>
                 </a>
             </div>
         </div>
     </nav>
+
 
     <!-- Main Container -->
     <div class="feed-container flex">
@@ -188,12 +195,11 @@
                             </div>
                         </div>
                         {% if post.created_by == user %}
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" class="text-gray-400 hover:text-gray-600">
+                        <div class="relative dropdown-container">
+                            <button class="dropdown-trigger text-gray-400 hover:text-gray-600">
                                 <i class="fas fa-ellipsis-h"></i>
                             </button>
-                            <div x-show="open" @click.away="open = false" 
-                                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1">
+                            <div class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 hidden">
                                 <button onclick="editPost('{{ post.feed_id }}')" 
                                         class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fas fa-edit mr-2"></i> Edit
@@ -898,6 +904,31 @@
     
         // Start polling when document is ready
         document.addEventListener('DOMContentLoaded', startUnreadCountPolling);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdowns = document.querySelectorAll('.dropdown-container');
+            
+            document.addEventListener('click', function(event) {
+                dropdowns.forEach(dropdown => {
+                    const menu = dropdown.querySelector('.dropdown-menu');
+                    const trigger = dropdown.querySelector('.dropdown-trigger');
+                    
+                    if (trigger.contains(event.target)) {
+                        // Close all other dropdowns first
+                        dropdowns.forEach(otherDropdown => {
+                            if (otherDropdown !== dropdown) {
+                                otherDropdown.querySelector('.dropdown-menu').classList.add('hidden');
+                            }
+                        });
+                        // Toggle current dropdown
+                        menu.classList.toggle('hidden');
+                    } else if (!menu.contains(event.target)) {
+                        // If clicking outside, close the dropdown
+                        menu.classList.add('hidden');
+                    }
+                });
+            });
+        });
     </script>
 
  

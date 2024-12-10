@@ -11,23 +11,31 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">   
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom scrollbar styles */
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
         }
+        
         .custom-scrollbar::-webkit-scrollbar-track {
             background: #f1f1f1;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #888;
             border-radius: 3px;
         }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: radial-gradient(
+                circle, 
+                hsl(180, 70%, 60%), /* Aqua */
+                hsl(220, 60%, 65%), /* Blue Transition */
+                hsl(260, 75%, 70%)  /* Soft Purple */
+            );
+            border-radius: 3px;
+        }
+        
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 overflow-hidden">
     <!-- Navigation -->
     <nav class="bg-white shadow-md fixed top-0 w-full z-50 h-16">
         <div class="w-full px-4 flex justify-between items-center h-full">
@@ -110,7 +118,7 @@
             </div>
 
         <!-- Main Content -->
-        <div class="main-content flex-1 p-8">
+        <div class="main-content flex-1 p-8 overflow-y-auto h-[calc(100vh-4rem)] custom-scrollbar">
             <!-- Points Card -->
             <div class="bg-white rounded-lg shadow p-6 mb-8">
                 <div class="flex justify-between items-center">
@@ -237,7 +245,7 @@
             </div>
             {% else %}
             <div class="sidebar bg-gray-100 p-4 custom-scrollbar w-64">
-                <div class="bg-white rounded-lg shadow p-4 mb-4">
+                <div class="bg-white rounded-lg shadow p-4 mb-4 mr-4">
                     <h2 class="font-bold text-xl mb-4">Filter Rewards</h2>
                     <form id="filterForm" class="space-y-4">
                         <!-- Points Range -->
