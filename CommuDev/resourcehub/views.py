@@ -54,7 +54,7 @@ def resource_list(request):
     categories = Category.objects.all()
     form = ResourceForm()
     
-    return render(request, 'resourcehub/home.html', {
+    return render(request, 'resourcehub/resourcehub.html', {
         'resources': resources,
         'categories': categories,
         'form': form
@@ -155,7 +155,7 @@ def resource_home(request):
     
     categories = Category.objects.all()
     
-    return render(request, 'home.html', {
+    return render(request, 'resourcehub.html', {
         'resources': resources,
         'categories': categories,
         'selected_category': category_id

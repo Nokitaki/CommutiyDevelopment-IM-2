@@ -16,7 +16,7 @@ def chat_home(request):
     """Main chat interface view"""
     # Get all users except the current user
     all_users = User.objects.exclude(userId=request.user.userId).order_by('firstname')
-    return render(request, 'chat/home.html', {'all_users': all_users})
+    return render(request, 'chat/chat.html', {'all_users': all_users})
 
 @login_required
 def get_unread_count(request):
