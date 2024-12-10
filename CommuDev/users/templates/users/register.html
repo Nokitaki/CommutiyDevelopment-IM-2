@@ -1,24 +1,266 @@
-<!-- users/templates/users/register.html -->
-{% extends 'users/base.html' %}
-{% load static %}
-{% block extra_css %}
-    <link href="{% static 'users/css/register.css' %}" rel="stylesheet">
-{% endblock %}
-{% block content %}
-<div class="register-container">
-    <h2 class="register-header">Register</h2>
-    <form method="post" class="register-form">
-        {% csrf_token %}
-        {% for field in form %}
-            <div class="form-group">
-                <label>{{ field.label }}</label>
-                {{ field }}
-                {% if field.errors %}
-                    <p class="error">{{ field.errors.0 }}</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - CommuDev</title>
+    {% load static %}
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@200;300;400;500;600;700&display=swap");
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Open Sans", sans-serif;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            padding: 20px 10px;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: url("{% static 'users/images/pic5.jpg' %}"), #000;
+            background-position: center;
+            background-size: cover;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .wrapper {
+            width: 400px;
+            max-height: 90vh;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(9px);
+            -webkit-backdrop-filter: blur(9px);
+            overflow-y: auto;
+        }
+
+        .wrapper::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .wrapper::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .wrapper::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: yellowgreen;
+        }
+
+        .input-field {
+            position: relative;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            margin: 10px 0;
+        }
+
+        .input-field label {
+            display: block;
+            color: rgba(36, 31, 31, 0.8);
+            font-size: 14px;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+
+        .input-field input {
+            width: 100%;
+            height: 35px;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            color: black;
+            padding: 0 5px;
+        }
+
+        .input-field input::placeholder {
+            color: rgba(77, 109, 77, 0.6);
+        }
+
+        button {
+            background: #fff;
+            color: #000;
+            font-weight: 600;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 16px;
+            border: 2px solid transparent;
+            transition: 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            color: #fff;
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #fff;
+        }
+
+        .login-link a {
+            color: #efefef;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .message {
+            color: #fff;
+            background: rgba(255, 0, 0, 0.2);
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .error-text {
+            color: #ff6b6b;
+            font-size: 12px;
+            margin-top: 3px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <form method="POST">
+            {% csrf_token %}
+            <h2>Register</h2>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Username field -->
+            <div class="input-field">
+                <label for="id_username">Username</label>
+                <input type="text" name="username" id="id_username" placeholder="Enter username" required>
+                {% if form.username.errors %}
+                    {% for error in form.username.errors %}
+                        <div class="error-text">{{ error }}</div>
+                    {% endfor %}
                 {% endif %}
             </div>
-        {% endfor %}
-        <button type="submit" class="register-button">Register</button>
-    </form>
-</div>
-{% endblock %}
+
+            <!-- First name field -->
+            <div class="input-field">
+                <label for="id_firstname">First Name</label>
+                <input type="text" name="firstname" id="id_firstname" placeholder="Enter first name" required>
+                {% if form.firstname.errors %}
+                    {% for error in form.firstname.errors %}
+                        <div class="error-text">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Last name field -->
+            <div class="input-field">
+                <label for="id_lastname">Last Name</label>
+                <input type="text" name="lastname" id="id_lastname" placeholder="Enter last name" required>
+                {% if form.lastname.errors %}
+                    {% for error in form.lastname.errors %}
+                        <div class="error-text">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Age field -->
+            <div class="input-field">
+                <label for="id_age">Age</label>
+                <input type="number" name="age" id="id_age" placeholder="Enter age" required>
+                {% if form.age.errors %}
+                    {% for error in form.age.errors %}
+                        <div class="error-text">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- State field -->
+            <div class="input-field">
+                <label for="id_state">State</label>
+                <input type="text" name="state" id="id_state" placeholder="Enter state" required>
+                {% if form.state.errors %}
+                    {% for error in form.state.errors %}
+                        <div class="error-text">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Employment Status field -->
+            <div class="input-field">
+                <label for="id_employmentStatus">Employment Status</label>
+                <input type="text" name="employmentStatus" id="id_employmentStatus" placeholder="Enter employment status" required>
+                {% if form.employmentStatus.errors %}
+                    {% for error in form.employmentStatus.errors %}
+                        <div class="error-text">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Password field -->
+            <div class="input-field">
+                <label for="id_password1">Password</label>
+                <input type="password" name="password1" id="id_password1" placeholder="Enter password" required>
+                {% if form.password1.errors %}
+                    {% for error in form.password1.errors %}
+                        <div class="error-text">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Confirm Password field -->
+            <div class="input-field">
+                <label for="id_password2">Confirm Password</label>
+                <input type="password" name="password2" id="id_password2" placeholder="Confirm password" required>
+                {% if form.password2.errors %}
+                    {% for error in form.password2.errors %}
+                        <div class="error-text">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <button type="submit">Register</button>
+
+            <div class="login-link">
+                Already have an account? <a href="{% url 'login' %}">Login</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
