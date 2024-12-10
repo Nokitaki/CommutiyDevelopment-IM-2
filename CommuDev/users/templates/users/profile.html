@@ -287,6 +287,175 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.language-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+.language-tag {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Activity status styling */
+.stat-box {
+    background-color: var(--light-gray);
+    padding: 1rem;
+    border-radius: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100px;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+/* Status dot colors */
+[data-status="Active"] .status-dot {
+    background-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+[data-status="Moderate"] .status-dot {
+    background-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+[data-status="Low"] .status-dot {
+    background-color: #fb923c;
+    box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.2);
+}
+
+[data-status="Inactive"] .status-dot {
+    background-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+/* Language selection */
+.language-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.selected-languages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.language-item {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.remove-language {
+    cursor: pointer;
+    color: #ef4444;
+    font-weight: bold;
+}   
+
+.language-tags, .goals-list, .hobbies-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.language-tag, .goal-item, .hobby-item {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.custom-select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.selected-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.item-tag {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.remove-item {
+    cursor: pointer;
+    color: #ef4444;
+    font-weight: bold;
+}
+
+/* Goals and Hobbies display */
+.bullet-list {
+    text-align: left;
+    margin: 0.5rem auto;
+    width: fit-content;
+}
+
+.bullet-list li {
+    list-style-type: disc;
+    margin-left: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+
 </style>
 {% endblock %}
 
@@ -328,28 +497,34 @@
         </div>
     </div>
 
-    <div class="profile-stats">
-        <div class="stat-box">
-            <h3>Languages</h3>
-            <div class="language-tags">
-                {% if user.languages %}
-                    {% for language in user.languages.split %}
-                        <span class="language-tag">{{ language }}</span>
-                    {% endfor %}
-                {% else %}
-                    <p>No languages specified</p>
-                {% endif %}
-            </div>
+
+
+    
+    <div class="stat-box">
+        <h3>Languages</h3>
+        <div class="language-tags">
+            {% if user.languages %}
+                {% for language in user.languages.split %}
+                    <span class="language-tag">{{ language }}</span>
+                {% endfor %}
+            {% else %}
+                <span>No languages specified</span>
+            {% endif %}
         </div>
-        <div class="stat-box">
-            <h3>Activity Status</h3>
-            <p class="activity-indicator {% if user.activity_status == 'Active' %}active{% elif user.activity_status == 'Moderate' %}moderate{% else %}inactive{% endif %}">
-                <span class="status-dot"></span>
-                {{ user.activity_status }}
-            </p>
+    </div>
+
+
+    <div class="stat-box" data-status="{{ user.activity_status }}">
+        <h3>Activity Status</h3>
+        <div class="status-indicator">
+            <span class="status-dot"></span>
+            {{ user.activity_status }}
         </div>
     </div>
     
+
+
+
     <div class="profile-stats">
         <div class="stat-box">
             <h3>Hobbies</h3>
@@ -564,6 +739,156 @@ function validateForm() {
 document.querySelector('form').addEventListener('submit', function(e) {
     if (!validateForm()) {
         e.preventDefault();
+    }
+});
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Common languages list (country languages)
+    const languages = [
+        'English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese',
+        'Chinese (Mandarin)', 'Japanese', 'Korean', 'Russian', 'Arabic',
+        'Hindi', 'Bengali', 'Turkish', 'Vietnamese', 'Thai', 'Dutch',
+        'Greek', 'Polish', 'Swedish', 'Danish', 'Finnish', 'Norwegian',
+        'Indonesian', 'Malay', 'Tagalog', 'Romanian', 'Hungarian', 'Czech',
+        'Ukrainian', 'Croatian', 'Serbian', 'Bulgarian', 'Hebrew', 'Persian',
+        'Urdu', 'Tamil', 'Telugu', 'Kannada', 'Malayalam', 'Swahili'
+    ].sort();
+
+    // Common hobbies list
+    const hobbies = [
+        'Reading', 'Writing', 'Traveling', 'Photography', 'Cooking',
+        'Gaming', 'Music', 'Sports', 'Art', 'Dancing', 'Hiking',
+        'Swimming', 'Gardening', 'Movies', 'Yoga', 'Meditation',
+        'Volunteering', 'Cycling', 'Running', 'Chess', 'Painting',
+        'Singing', 'Baking', 'Fishing', 'Camping', 'Crafting',
+        'Woodworking', 'Bird Watching', 'Astronomy', 'Collecting',
+        'Musical Instruments', 'Theatre', 'DIY Projects', 'Blogging',
+        'Martial Arts', 'Rock Climbing', 'Skateboarding', 'Surfing',
+        'Pottery', 'Language Learning'
+    ].sort();
+
+    // Common goals list
+    const goals = [
+        'Learn a new language', 'Travel to new countries', 'Professional development',
+        'Community service', 'Health and fitness', 'Personal growth',
+        'Cultural exchange', 'Skill development', 'Make new friends',
+        'Share knowledge', 'Help others', 'Network building',
+        'Start a business', 'Environmental conservation', 'Teaching others',
+        'Creative expression', 'Career advancement', 'Public speaking',
+        'Leadership skills', 'Work-life balance', 'Financial literacy',
+        'Mental wellness', 'Social impact', 'Innovation',
+        'Technical expertise', 'Global awareness', 'Team collaboration',
+        'Project management', 'Digital literacy', 'Sustainable living'
+    ].sort();
+
+    // Setup multiple select functionality
+    function setupMultiSelect(inputName, options, placeholder) {
+        const input = document.querySelector(`input[name="${inputName}"]`);
+        if (!input) return;
+
+        // Create custom select element
+        const select = document.createElement('select');
+        select.className = 'custom-select';
+        
+        // Add options to select
+        select.innerHTML = `
+            <option value="">${placeholder}</option>
+            ${options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+        `;
+        
+        // Create container for selected items
+        const selectedContainer = document.createElement('div');
+        selectedContainer.className = 'selected-items';
+        
+        // Insert elements into DOM
+        input.parentNode.insertBefore(select, input);
+        input.parentNode.insertBefore(selectedContainer, input);
+        input.style.display = 'none';
+        
+        // Initialize selected items from existing input value
+        let selectedItems = input.value ? input.value.split(',').map(i => i.trim()).filter(i => i) : [];
+        updateSelectedItems();
+        
+        // Handle new selections
+        select.addEventListener('change', function() {
+            if (this.value && !selectedItems.includes(this.value)) {
+                selectedItems.push(this.value);
+                updateSelectedItems();
+                this.value = '';
+            }
+        });
+
+        // Function to update the display of selected items
+        function updateSelectedItems() {
+            selectedContainer.innerHTML = selectedItems.map(item => `
+                <span class="item-tag">
+                    ${item}
+                    <span class="remove-item" data-item="${item}">×</span>
+                </span>
+            `).join('');
+            
+            // Update hidden input value
+            input.value = selectedItems.join(', ');
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-item').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const item = this.dataset.item;
+                    selectedItems = selectedItems.filter(i => i !== item);
+                    updateSelectedItems();
+                });
+            });
+        }
+    }
+
+    // Initialize all multi-select inputs
+    setupMultiSelect('languages', languages, 'Select a language...');
+    setupMultiSelect('hobbies', hobbies, 'Select a hobby...');
+    setupMultiSelect('goals', goals, 'Select a goal...');
+
+    // Handle activity status indicator
+    const statusBox = document.querySelector('[data-status]');
+    if (statusBox) {
+        const status = statusBox.dataset.status;
+        const statusDot = statusBox.querySelector('.status-dot');
+        if (statusDot) {
+            switch(status) {
+                case 'Active':
+                    statusDot.style.backgroundColor = '#22c55e';
+                    statusDot.style.boxShadow = '0 0 0 3px rgba(34, 197, 94, 0.2)';
+                    break;
+                case 'Moderate':
+                    statusDot.style.backgroundColor = '#f59e0b';
+                    statusDot.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.2)';
+                    break;
+                case 'Low':
+                    statusDot.style.backgroundColor = '#fb923c';
+                    statusDot.style.boxShadow = '0 0 0 3px rgba(251, 146, 60, 0.2)';
+                    break;
+                case 'Inactive':
+                    statusDot.style.backgroundColor = '#ef4444';
+                    statusDot.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.2)';
+                    break;
+            }
+        }
+    }
+
+    // Profile picture preview functionality
+    const profilePicInput = document.querySelector('input[name="profile_picture"]');
+    const profilePicPreview = document.getElementById('profilePicturePreview');
+    
+    if (profilePicInput && profilePicPreview) {
+        profilePicInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    profilePicPreview.src = e.target.result;
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
     }
 });
 
