@@ -1,0 +1,583 @@
+<!-- rewards/templates/rewards/list.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CommuDev - Rewards</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">   
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar styles */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md fixed top-0 w-full z-50 h-16">
+        <div class="w-full px-4 flex justify-between items-center h-full">
+            <div class="flex-shrink-0">
+                <h1 class="text-2xl font-bold text-gray-900">CommuDev</h1>
+            </div>
+            <div class="flex items-center space-x-8">
+                <a href="{% url 'home' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-home text-xl"></i>
+                    <span class="text-xs mt-1">Home</span>
+                </a>
+                <a href="{% url 'resource_home' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-book text-xl"></i>
+                    <span class="text-xs mt-1">Resources</span>
+                </a>
+                <a href="{% url 'chat_home' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center relative">
+                    <i class="fas fa-comments text-xl"></i>
+                    <span class="text-xs mt-1">Chat</span>
+                    <span id="nav-unread-count" 
+                          class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center hidden">
+                    </span>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-tasks text-xl"></i>
+                    <span class="text-xs mt-1">Tasks</span>
+                </a>
+                <a href="{% url 'reward-list' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-gift text-xl"></i>
+                    <span class="text-xs mt-1">Rewards</span>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-comment-dots text-xl"></i>
+                    <span class="text-xs mt-1">Messages</span>
+                </a>
+                <a href="{% url 'profile' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-user-circle text-xl"></i>
+                    <span class="text-xs mt-1">Profile</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Spacer for fixed navigation -->
+    <div class="h-16 mb-4"></div>
+
+    <!-- Feed Container -->
+    <div class="feed-container flex">
+        <!-- Left Sidebar -->
+            <div class="sidebar bg-gray-100 p-4 custom-scrollbar w-64">
+                <div class="bg-white rounded-lg shadow p-4 mb-4">
+                    <h2 class="font-bold text-xl mb-4">Top Redeemers</h2>
+                    <div class="space-y-4">
+                        {% for user_points in top_redeemers %}
+                        <div class="flex items-center space-x-3">
+                            <div class="relative">
+                                <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                                    <!-- Display first letter of username -->
+                                    <span class="text-gray-600 font-semibold">{{ user_points.user.username|first|upper }}</span>
+                                </div>
+                                <!-- Rank badge -->
+                                <div class="absolute -top-2 -left-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white text-xs font-bold">{{ forloop.counter }}</span>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-900">{{ user_points.user.username }}</p>
+                                <div class="flex items-center">
+                                    <i class="fas fa-star text-yellow-400 text-xs mr-1"></i>
+                                    <p class="text-sm text-gray-500">{{ user_points.points }} points</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center text-gray-500 py-4">
+                            <p>No redeemers yet</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        <!-- Main Content -->
+        <div class="main-content flex-1 p-8">
+            <!-- Points Card -->
+            <div class="bg-white rounded-lg shadow p-6 mb-8">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold">Your Points: {{ user_points.points }}</h2>
+                        <p class="text-gray-600">Keep earning to unlock more rewards!</p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button onclick="openRedeemCodeModal()" 
+                                class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+                            Redeem Code
+                        </button>
+                        {% if user.is_staff %}
+                        <button onclick="openCreateRewardModal()" 
+                                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                            Create Reward
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rewards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for reward in rewards %}
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <!-- Image section remains the same -->
+                    <div class="h-48 bg-gray-200">
+                        {% if reward.image %}
+                            <img src="{{ reward.image.url }}" alt="{{ reward.name }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center">
+                                <span class="text-gray-400">No Image</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold">{{ reward.name }}</h3>
+                        <p class="text-gray-600 text-sm mb-4">{{ reward.description }}</p>
+                        
+                        <!-- Value and Points Display -->
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-blue-500 font-bold flex items-center">
+                                    <i class="fas fa-coins mr-1"></i>
+                                    {{ reward.points_required }} points
+                                </span>
+                                <span class="text-green-600 font-medium">
+                                    ₱{{ reward.value|floatformat:2 }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">
+                                    Points per peso: {{ reward.points_per_peso }}
+                                </span>
+                                <span class="text-gray-500">{{ reward.quantity }} left</span>
+                            </div>
+                        </div>
+
+                        <!-- Redeem Button -->
+                        {% if user_points.points >= reward.points_required and reward.quantity > 0 %}
+                            <button onclick="redeemReward({{ reward.reward_id }})" 
+                                    class="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 flex items-center justify-center">
+                                <i class="fas fa-gift mr-2"></i>
+                                Redeem
+                            </button>
+                        {% else %}
+                            <button disabled 
+                                    class="w-full bg-gray-300 text-gray-500 py-2 rounded-lg cursor-not-allowed">
+                                {% if reward.quantity <= 0 %}
+                                    Out of Stock
+                                {% else %}
+                                    Insufficient Points
+                                {% endif %}
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-3 text-center py-8">
+                    <p class="text-gray-500">No rewards available at the moment.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="sidebar bg-gray-100 p-4 custom-scrollbar w-64">
+            {% if user.is_staff %}
+            <!-- Admin Code Generator (Keep your existing code) -->
+            <div class="bg-white rounded-lg shadow p-4 mb-4">
+                <h2 class="font-bold text-xl mb-4">Generate Codes</h2>
+                <form id="generateCodesForm" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Points per Code</label>
+                        <input type="number" name="points" min="1" 
+                               class="w-full p-2 border rounded-lg text-sm"
+                               placeholder="Enter points value">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Number of Codes</label>
+                        <input type="number" name="quantity" min="1" max="100" 
+                               class="w-full p-2 border rounded-lg text-sm"
+                               placeholder="How many codes?">
+                    </div>
+                    <button type="submit" 
+                            class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 text-sm">
+                        Generate Codes
+                    </button>
+                </form>
+                
+                <div id="generatedCodes" class="mt-6 hidden">
+                    <h3 class="font-semibold mb-2">Generated Codes:</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <ul id="codesList" class="space-y-2 text-sm"></ul>
+                        <button onclick="copyAllCodes()" 
+                                class="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 w-full text-sm">
+                            Copy All Codes
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="sidebar bg-gray-100 p-4 custom-scrollbar w-64">
+                <div class="bg-white rounded-lg shadow p-4 mb-4">
+                    <h2 class="font-bold text-xl mb-4">Filter Rewards</h2>
+                    <form id="filterForm" class="space-y-4">
+                        <!-- Points Range -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Points Range</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="number" 
+                                    id="minPoints" 
+                                    name="min_points"
+                                    min="0" 
+                                    class="w-full p-2 border rounded-lg text-sm" 
+                                    placeholder="Min"
+                                    oninput="validatePointsRange(this)">
+                                <span class="text-gray-500">to</span>
+                                <input type="number" 
+                                    id="maxPoints" 
+                                    name="max_points"
+                                    min="0" 
+                                    class="w-full p-2 border rounded-lg text-sm" 
+                                    placeholder="Max"
+                                    oninput="validatePointsRange(this)">
+                            </div>
+                            <p id="pointsError" class="text-red-500 text-xs mt-1 hidden">
+                                Points cannot be negative and max points must be greater than min points
+                            </p>
+                        </div>
+            
+                        <!-- Availability Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Availability</label>
+                            <select id="availability" name="availability" 
+                                    class="w-full p-2 border rounded-lg text-sm">
+                                <option value="all">All Rewards</option>
+                                <option value="available">Available Only</option>
+                                <option value="affordable">Affordable for Me</option>
+                            </select>
+                        </div>
+            
+                        <!-- Sort By -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                            <select id="sortBy" name="sort" 
+                                    class="w-full p-2 border rounded-lg text-sm">
+                                <option value="newest">Newest First</option>
+                                <option value="points-low">Points: Low to High</option>
+                                <option value="points-high">Points: High to Low</option>
+                                <option value="quantity">Most Available</option>
+                            </select>
+                        </div>
+            
+                        <!-- Apply/Reset Buttons -->
+                        <div class="flex space-x-2">
+                            <button type="button" onclick="applyFilters()" 
+                                    class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 text-sm">
+                                Apply
+                            </button>
+                            <button type="button" onclick="resetFilters()" 
+                                    class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 text-sm">
+                                Reset
+                            </button>
+                        </div>
+                    </form>
+            
+                    <!-- Active Filters Tags -->
+                    <div id="activeFilters" class="mt-4 flex flex-wrap gap-2">
+                        <!-- Active filters will be displayed here -->
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+    <!-- Modals -->
+    <!-- Create Reward Modal -->
+    <div id="createRewardModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg w-full max-w-md">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-4">Create New Reward</h3>
+                    <form method="POST" action="{% url 'reward-create' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button type="button" onclick="closeCreateRewardModal()" 
+                                    class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                                Cancel
+                            </button>
+                            <button type="submit" 
+                                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                                Create
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Redeem Code Modal -->
+    <div id="redeemCodeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg w-full max-w-md p-6">
+                <h3 class="text-xl font-semibold mb-4">Redeem Code</h3>
+                <form method="POST" action="{% url 'redeem-code' %}">
+                    {% csrf_token %}
+                    <input type="text" name="code" 
+                           class="w-full p-2 border rounded-lg mb-4" 
+                           placeholder="Enter redemption code">
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeRedeemCodeModal()" 
+                                class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                            Redeem
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+    function openCreateRewardModal() {
+        document.getElementById('createRewardModal').classList.remove('hidden');
+    }
+
+    function closeCreateRewardModal() {
+        document.getElementById('createRewardModal').classList.add('hidden');
+    }
+
+    function openRedeemCodeModal() {
+        document.getElementById('redeemCodeModal').classList.remove('hidden');
+    }
+
+    function closeRedeemCodeModal() {
+        document.getElementById('redeemCodeModal').classList.add('hidden');
+    }
+
+    function redeemReward(rewardId) {
+        if (confirm('Are you sure you want to redeem this reward?')) {
+            fetch(`/rewards/redeem/${rewardId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Reward redeemed successfully!');
+                    location.reload();
+                } else {
+                    alert(data.error || 'Failed to redeem reward');
+                }
+            })
+            .catch(error => {
+                alert('An error occurred while redeeming the reward.');
+            });
+        }
+    }
+
+    // Code generation form handler
+    document.getElementById('generateCodesForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        fetch('{% url "generate-codes" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.codes) {
+                const codesList = document.getElementById('codesList');
+                codesList.innerHTML = '';
+                data.codes.forEach(code => {
+                    const li = document.createElement('li');
+                    li.textContent = code;
+                    codesList.appendChild(li);
+                });
+                document.getElementById('generatedCodes').classList.remove('hidden');
+            }
+        });
+    });
+
+    function copyAllCodes() {
+        const codes = Array.from(document.getElementById('codesList').children)
+            .map(li => li.textContent)
+            .join('\n');
+        navigator.clipboard.writeText(codes);
+        alert('All codes copied to clipboard!');
+    }
+
+    function applyFilters() {
+        const minInput = document.getElementById('minPoints');
+        const maxInput = document.getElementById('maxPoints');
+        
+        if (minInput.value && maxInput.value) {
+            const minValue = parseInt(minInput.value);
+            const maxValue = parseInt(maxInput.value);
+            
+            if (maxValue < minValue) {
+                return; // Don't apply filters if validation fails
+            }
+        }
+        
+        const form = document.getElementById('filterForm');
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+    
+        // Add non-empty values to URL parameters
+        for (const [key, value] of formData.entries()) {
+            if (value) {
+                params.append(key, value);
+            }
+        }
+    
+        // Update URL and reload page with filters
+        window.location.search = params.toString();
+    }
+
+    function resetFilters() {
+        // Redirect to base URL without parameters
+        window.location.href = window.location.pathname;
+    }
+    
+    // Function to update active filter tags
+    function updateActiveFilters() {
+        const activeFilters = document.getElementById('activeFilters');
+        activeFilters.innerHTML = '';
+    
+        const params = new URLSearchParams(window.location.search);
+        params.forEach((value, key) => {
+            const tag = document.createElement('span');
+            tag.className = 'px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center';
+            tag.innerHTML = `
+                ${formatFilterName(key, value)}
+                <button onclick="removeFilter('${key}')" class="ml-1 text-blue-600 hover:text-blue-800">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            activeFilters.appendChild(tag);
+        });
+    }
+    
+    function formatFilterName(key, value) {
+        switch (key) {
+            case 'min_points':
+                return `Min: ${value} pts`;
+            case 'max_points':
+                return `Max: ${value} pts`;
+            case 'availability':
+                return value.charAt(0).toUpperCase() + value.slice(1);
+            case 'sort':
+                return `Sort: ${value.replace('-', ' ').charAt(0).toUpperCase() + value.slice(1)}`;
+            default:
+                return `${key}: ${value}`;
+        }
+    }
+    
+    function removeFilter(key) {
+        const params = new URLSearchParams(window.location.search);
+        params.delete(key);
+        window.location.search = params.toString();
+    }
+    
+    // Initialize form values from URL parameters
+    document.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        
+        // Set form values from URL parameters
+        params.forEach((value, key) => {
+            const element = document.querySelector(`[name="${key}"]`);
+            if (element) {
+                element.value = value;
+            }
+        });
+    
+        // Update active filters display
+        const activeFilters = document.getElementById('activeFilters');
+        if (activeFilters) {
+            activeFilters.innerHTML = '';
+            params.forEach((value, key) => {
+                const filterName = key.replace('_', ' ').replace(/^\w/, c => c.toUpperCase());
+                const tag = document.createElement('div');
+                tag.className = 'px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs flex items-center';
+                tag.innerHTML = `
+                    ${filterName}: ${value}
+                    <button onclick="removeFilter('${key}')" class="ml-1 text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                activeFilters.appendChild(tag);
+            });
+        }
+    });
+    
+    function removeFilter(key) {
+        const params = new URLSearchParams(window.location.search);
+        params.delete(key);
+        window.location.search = params.toString();
+    }
+
+    function validatePointsRange(input) {
+        const minInput = document.getElementById('minPoints');
+        const maxInput = document.getElementById('maxPoints');
+        const errorMessage = document.getElementById('pointsError');
+        
+        // Prevent negative values
+        if (input.value < 0) {
+            input.value = 0;
+        }
+        
+        // Check if both inputs have values
+        if (minInput.value && maxInput.value) {
+            const minValue = parseInt(minInput.value);
+            const maxValue = parseInt(maxInput.value);
+            
+            // Show error if max is less than min
+            if (maxValue < minValue) {
+                errorMessage.classList.remove('hidden');
+                document.querySelector('button[onclick="applyFilters()"]').disabled = true;
+                document.querySelector('button[onclick="applyFilters()"]').classList.add('opacity-50');
+            } else {
+                errorMessage.classList.add('hidden');
+                document.querySelector('button[onclick="applyFilters()"]').disabled = false;
+                document.querySelector('button[onclick="applyFilters()"]').classList.remove('opacity-50');
+            }
+        } else {
+            errorMessage.classList.add('hidden');
+            document.querySelector('button[onclick="applyFilters()"]').disabled = false;
+            document.querySelector('button[onclick="applyFilters()"]').classList.remove('opacity-50');
+        }
+    }
+    </script>
+</body>
+</html>
