@@ -92,9 +92,11 @@ def get_messages(request, user_id):
     ).order_by('timestamp')
 
     messages_data = [{
+        'id': msg.id,  # Add this line
         'content': msg.content,
         'sender_id': str(msg.sender.userId),
         'timestamp': localtime(msg.timestamp).strftime('%I:%M %p'),
+        'is_unsent': msg.is_unsent  # Add this line
     } for msg in messages]
 
     return JsonResponse({'messages': messages_data})
@@ -137,3 +139,40 @@ def mark_messages_read(request, user_id):
         is_read=False
     ).update(is_read=True)
     return JsonResponse({'status': 'success'})
+
+@login_required
+@require_POST
+def edit_message(request, message_id):
+    try:
+        message = Message.objects.get(id=message_id, sender=request.user)
+        data = json.loads(request.body)
+        message.content = data['content']
+        message.save()
+        return JsonResponse({
+            'status': 'success',
+            'message': {
+                'content': message.content,
+                'timestamp': localtime(message.timestamp).strftime('%I:%M %p'),
+            }
+        })
+    except Message.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Message not found'}, status=404)
+    
+@login_required
+@require_POST
+def unsend_message(request, message_id):
+    try:
+        message = Message.objects.get(id=message_id, sender=request.user)
+        message.is_unsent = True
+        message.save()
+        return JsonResponse({'status': 'success'})
+    except Message.DoesNotExist:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Message not found or you do not have permission to unsend it'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)

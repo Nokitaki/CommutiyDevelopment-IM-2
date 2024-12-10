@@ -141,6 +141,18 @@
         </div>
     </div>
 
+    <!-- Template for message context menu -->
+    <div id="message-context-menu" class="hidden fixed bg-white rounded-lg shadow-lg py-2 z-50 w-32">
+        <button class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center" onclick="editMessage()">
+            <i class="fas fa-edit mr-2"></i> Edit
+        </button>
+        <button class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center" onclick="unsendMessage()">
+            <i class="fas fa-trash-alt mr-2"></i> Unsend
+        </button>
+    </div>
+
+    
+
     <script>
         // Global variables
         let selectedUserId = null;
@@ -163,38 +175,30 @@
         });
     
         // Initialize search functionality for conversations (left sidebar)
-document.querySelector('input[placeholder="Search conversations"]').addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const contactItems = document.querySelectorAll('.contact-item');
-    
-    contactItems.forEach(item => {
-        // Get the name from the div structure
-        const nameElement = item.querySelector('h3');
-        // Get the message preview from the p element inside contact-item
-        const messageElement = item.querySelector('p:not(.text-gray-400)'); // Exclude timestamp
-        
-        let shouldShow = false;
-        
-        // Check name
-        if (nameElement) {
-            const name = nameElement.textContent.toLowerCase().trim();
-            if (name.includes(searchTerm)) {
-                shouldShow = true;
-            }
-        }
-        
-        // Check message content
-        if (messageElement && !shouldShow) {
-            const messageContent = messageElement.textContent.toLowerCase().trim();
-            if (messageContent !== 'start a conversation' && messageContent.includes(searchTerm)) {
-                shouldShow = true;
-            }
-        }
-        
-        // Show/hide based on result
-        item.style.display = shouldShow ? '' : 'none';
-    });
-});
+        document.querySelector('input[placeholder="Search conversations"]').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const contactItems = document.querySelectorAll('.contact-item');
+            
+            contactItems.forEach(item => {
+                // Find the name element and the message preview element
+                const nameElement = item.querySelector('h3');
+                const messageElement = item.querySelector('p');
+                
+                // Safely get the text content
+                const contactName = nameElement ? nameElement.textContent.toLowerCase() : '';
+                const lastMessage = messageElement ? messageElement.textContent.toLowerCase() : '';
+                
+                // Exclude timestamp from search
+                const searchableMessage = lastMessage.replace(/\d{1,2}:\d{2} (AM|PM)/g, '').trim();
+                
+                // Show/hide based on search term
+                if (contactName.includes(searchTerm) || searchableMessage.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
             
         // Function to format timestamp
         function formatTimestamp(timestamp) {
@@ -299,7 +303,7 @@ document.querySelector('input[placeholder="Search conversations"]').addEventList
             
             loadMessages(userId);
         }
-    
+
         // Function to load messages
         function loadMessages(userId) {
             fetch(`/chat/messages/${userId}/`)
@@ -310,9 +314,8 @@ document.querySelector('input[placeholder="Search conversations"]').addEventList
                     
                     messagesContainer.innerHTML = data.messages.map(message => {
                         let messageHTML = '';
-                        // Use the current timestamp for the date separator
-                        const today = new Date();
-                        const formattedDate = today.toLocaleDateString('en-US', { 
+                        const messageDate = new Date();
+                        const formattedDate = messageDate.toLocaleDateString('en-US', { 
                             weekday: 'long', 
                             year: 'numeric', 
                             month: 'long', 
@@ -331,25 +334,113 @@ document.querySelector('input[placeholder="Search conversations"]').addEventList
                             `;
                         }
         
-                        messageHTML += `
-                            <div class="flex ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'} mb-2 group">
-                                <div class="flex flex-col ${message.sender_id === currentUserId ? 'items-end' : 'items-start'}">
-                                    <div class="flex">
-                                        <div class="inline-block max-w-[300px] ${message.sender_id === currentUserId ? 'bg-blue-500 text-white' : 'bg-gray-100'} 
-                                            rounded-2xl px-4 py-2 ${message.sender_id === currentUserId ? 'rounded-tr-none' : 'rounded-tl-none'}">
-                                            <p class="text-sm whitespace-pre-wrap break-words">${message.content}</p>
+                        if (!message.is_unsent) {
+                            const isSender = message.sender_id === currentUserId;
+                            messageHTML += `
+                                <div class="flex ${isSender ? 'justify-end' : 'justify-start'} mb-3 group relative"
+                                     data-message-id="${message.id}"
+                                     data-is-sender="${isSender}">
+                                    <div class="flex flex-col max-w-[75%] min-w-[50px] relative">
+                                        ${isSender ? `
+                                            <button class="absolute -left-8 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    onclick="showMessageOptions(event, ${message.id})" aria-label="Message options">
+                                                <i class="fas fa-ellipsis-v text-gray-500 hover:text-gray-700"></i>
+                                            </button>
+                                        ` : ''}
+                                        <div class="${isSender ? 'bg-[#0084ff] text-white' : 'bg-[#f0f0f0] text-black'} 
+                                            rounded-[20px] px-4 py-2 
+                                            ${isSender ? 'rounded-tr-[4px]' : 'rounded-tl-[4px]'}">
+                                            <p class="text-[15px] leading-[1.4]" id="message-content-${message.id}">
+                                                ${message.content}
+                                            </p>
                                         </div>
+                                        <span class="text-xs text-gray-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity px-1">
+                                            ${message.timestamp}
+                                        </span>
                                     </div>
-                                    <span class="text-xs text-gray-500 mt-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        ${message.timestamp}
-                                    </span>
                                 </div>
-                            </div>
-                        `;
+                            `;
+                        } else {
+                            messageHTML += `
+                                <div class="flex justify-center my-2">
+                                    <span class="text-xs text-gray-500 italic">You unsent a message</span>
+                                </div>
+                            `;
+                        }
                         return messageHTML;
                     }).join('');
                     scrollToBottom();
+                });
+        }
+        
+        // Add these helper functions
+        let currentMessageId = null;
+        
+        function showMessageOptions(event, messageId) {
+            event.stopPropagation();
+            currentMessageId = messageId;
+            const menu = document.getElementById('message-context-menu');
+            menu.style.display = 'block';
+            const button = event.target.closest('button');
+            const rect = button.getBoundingClientRect();
+            menu.style.left = `${rect.left - menu.offsetWidth - 5}px`;
+            menu.style.top = `${rect.top}px`;
+        }
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('message-context-menu');
+            if (!menu.contains(event.target) && !event.target.matches('button[onclick^="showMessageOptions"]')) {
+                menu.style.display = 'none';
+            }
+        });
+        
+        function editMessage() {
+            if (!currentMessageId) return;
+            const messageEl = document.getElementById(`message-content-${currentMessageId}`);
+            if (!messageEl) return;
+            
+            const currentContent = messageEl.textContent.trim();
+            const newContent = prompt('Edit message:', currentContent);
+            
+            if (newContent && newContent !== currentContent) {
+                fetch(`/chat/message/edit/${currentMessageId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ content: newContent })
                 })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        loadMessages(selectedUserId);
+                    }
+                });
+            }
+            document.getElementById('message-context-menu').style.display = 'none';
+        }
+        
+        function unsendMessage() {
+            if (!currentMessageId || !confirm('Are you sure you want to unsend this message?')) return;
+            
+            fetch(`/chat/message/unsend/${currentMessageId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        loadMessages(selectedUserId);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            
+            document.getElementById('message-context-menu').style.display = 'none';
         }
     
         // Function to send message

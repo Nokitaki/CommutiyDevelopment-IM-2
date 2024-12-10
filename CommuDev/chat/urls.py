@@ -9,4 +9,6 @@ urlpatterns = [
     path('send/', views.send_message, name='send_message'),
     path('unread-count/', views.get_unread_count, name='get_unread_count'),
     path('mark-read/<uuid:user_id>/', views.mark_messages_read, name='mark_messages_read'),
+    path('message/edit/<int:message_id>/', views.edit_message, name='edit_message'),
+    path('message/unsend/<int:message_id>/', views.unsend_message, name='unsend_message'),
 ]
