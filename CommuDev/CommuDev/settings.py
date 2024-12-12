@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'taskManager',
     'chat',
     'calendar_events',
+    'task',
 
 ]
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'

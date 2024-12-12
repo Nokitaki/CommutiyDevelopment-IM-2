@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CommuDev Tasks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .task-container {
+            height: calc(100vh - 64px);
+            margin-top: 64px;
+        }
+
+        .task-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    {% csrf_token %}
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md fixed top-0 w-full z-50 h-16">
+        <div class="w-full px-4 flex justify-between items-center h-full">
+            <div class="flex-shrink-0">
+                <h1 class="text-2xl font-bold text-gray-900">CommuDev</h1>
+            </div>
+            <div class="flex items-center space-x-8">
+                <a href="{% url 'home' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-home text-xl"></i>
+                    <span class="text-xs mt-1">Home</span>
+                </a>
+                <a href="{% url 'resource_home' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-book text-xl"></i>
+                    <span class="text-xs mt-1">Resources</span>
+                </a>
+                <a href="{% url 'chat_home' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center relative">
+                    <i class="fas fa-comments text-xl"></i>
+                    <span class="text-xs mt-1">Chat</span>
+                    <span id="nav-unread-count" class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center hidden"></span>
+                </a>
+                <a href="{% url 'task:task_list' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-tasks text-xl"></i>
+                    <span class="text-xs mt-1">Tasks</span>
+                </a>
+                <a href="{% url 'reward-list' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-gift text-xl"></i>
+                    <span class="text-xs mt-1">Rewards</span>
+                </a>
+                <a href="{% url 'feedback:feedback-list' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-flag text-xl"></i>
+                    <span class="text-xs mt-1">Feedbacks</span>
+                </a>
+                <a href="{% url 'profile' %}" class="text-gray-600 hover:text-gray-900 flex flex-col items-center">
+                    <i class="fas fa-user-circle text-xl"></i>
+                    <span class="text-xs mt-1">Profile</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="task-container flex">
+        <!-- Left Sidebar -->
+        <div class="w-1/5 bg-white p-4 shadow-md">
+            <h2 class="text-xl font-bold mb-4">Task Categories</h2>
+            <ul class="space-y-2">
+                <li>
+                    <a href="{% url 'task:task_list' %}?filter=all" 
+                       class="flex items-center p-2 hover:bg-gray-100 rounded-lg {% if not request.GET.filter or request.GET.filter == 'all' %}bg-gray-100{% endif %}">
+                        <i class="fas fa-tasks mr-3 text-blue-500"></i>
+                        All Tasks
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'task:task_list' %}?filter=assigned" 
+                       class="flex items-center p-2 hover:bg-gray-100 rounded-lg {% if request.GET.filter == 'assigned' %}bg-gray-100{% endif %}">
+                        <i class="fas fa-user-check mr-3 text-green-500"></i>
+                        My Tasks
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'task:task_list' %}?filter=available" 
+                       class="flex items-center p-2 hover:bg-gray-100 rounded-lg {% if request.GET.filter == 'available' %}bg-gray-100{% endif %}">
+                        <i class="fas fa-calendar-plus mr-3 text-purple-500"></i>
+                        Available Events
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-y-auto custom-scrollbar">
+            {% if user.is_staff %}
+            <div class="mb-6">
+                <button onclick="openCreateTaskModal()" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center">
+                    <i class="fas fa-plus-circle mr-2"></i>
+                    Create New Task/Event
+                </button>
+            </div>
+            {% endif %}
+
+            <!-- Tasks Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for task in tasks %}
+                <div class="task-card bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-semibold">{{ task.title }}</h3>
+                                <p class="text-sm text-gray-500">By {{ task.created_by.firstname }} {{ task.created_by.lastname }}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-sm 
+                                {% if task.priority == 'HIGH' %}bg-red-100 text-red-800
+                                {% elif task.priority == 'MEDIUM' %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ task.priority }}
+                            </span>
+                        </div>
+                        
+                        <p class="text-gray-600 mb-4">{{ task.description|truncatewords:30 }}</p>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="flex items-center text-sm text-gray-500">
+                                <i class="far fa-calendar mr-2"></i>
+                                Due: {{ task.due_date|date:"F j, Y" }}
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500">
+                                <i class="far fa-clock mr-2"></i>
+                                {{ task.due_date|date:"g:i A" }}
+                            </div>
+                        </div>
+
+                        {% if task.is_event %}
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <i class="fas fa-users mr-2"></i>
+                            Participants: {{ task.assigned_to.count }}
+                            {% if task.max_participants > 0 %}
+                            / {{ task.max_participants }}
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <div class="mt-4 flex justify-between items-center">
+                            <span class="px-3 py-1 rounded-full text-sm 
+                                {% if task.status == 'COMPLETED' %}bg-green-100 text-green-800
+                                {% elif task.status == 'IN_PROGRESS' %}bg-blue-100 text-blue-800
+                                {% elif task.status == 'CANCELLED' %}bg-gray-100 text-gray-800
+                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {{ task.status }}
+                            </span>
+
+                            <div class="flex gap-2">
+                                {% if task.is_event and user not in task.assigned_to.all %}
+                                <button onclick="joinTask({{ task.task_id }})"
+                                        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                                    Join Event
+                                </button>
+                                {% elif task.is_event %}
+                                <button onclick="leaveTask({{ task.task_id }})"
+                                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                                    Leave Event
+                                </button>
+                                {% endif %}
+                                <button onclick="openTaskDetail({{ task.task_id }})" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                            View Details
+                        </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-2 text-center py-8 bg-white rounded-lg shadow">
+                    <p class="text-gray-500">No tasks or events available at the moment.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="w-1/5 bg-white p-4 shadow-md">
+            <h2 class="text-xl font-bold mb-4">Task Statistics</h2>
+            <div class="space-y-4">
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <h3 class="font-semibold text-gray-700">My Tasks</h3>
+                    <div class="mt-2 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Pending</span>
+                            <span class="font-semibold">{{ pending_count }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">In Progress</span>
+                            <span class="font-semibold">{{ in_progress_count }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Completed</span>
+                            <span class="font-semibold">{{ completed_count }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <h3 class="font-semibold text-gray-700">Upcoming Events</h3>
+                    <div class="mt-2 space-y-3">
+                        {% for event in upcoming_events %}
+                        <div class="text-sm">
+                            <div class="font-semibold text-gray-800">{{ event.title }}</div>
+                            <div class="text-gray-600">{{ event.due_date|date:"F j, Y" }}</div>
+                        </div>
+                        {% empty %}
+                        <p class="text-sm text-gray-500">No upcoming events</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Task Modal -->
+    <div id="createTaskModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg w-full max-w-2xl mx-4">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="text-xl font-semibold text-gray-900">Create New Task/Event</h3>
+                <button onclick="closeCreateTaskModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form method="POST" action="{% url 'task:create_task' %}" class="p-6 space-y-4">
+                {% csrf_token %}
+                <!-- Title -->
+                <div class="space-y-2">
+                    <label for="title" class="block text-sm font-medium text-gray-700">Title *</label>
+                    <input type="text" name="title" id="title" required
+                           class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <!-- Description -->
+                <div class="space-y-2">
+                    <label for="description" class="block text-sm font-medium text-gray-700">Description *</label>
+                    <textarea name="description" id="description" rows="4" required
+                              class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"></textarea>
+                </div>
+
+                <!-- Due Date and Time -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label for="due_date" class="block text-sm font-medium text-gray-700">Due Date *</label>
+                        <input type="date" name="due_date" id="due_date" required
+                               class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <div class="space-y-2">
+                        <label for="due_time" class="block text-sm font-medium text-gray-700">Due Time *</label>
+                        <input type="time" name="due_time" id="due_time" required
+                               class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <!-- Priority -->
+                <div class="space-y-2">
+                    <label for="priority" class="block text-sm font-medium text-gray-700">Priority *</label>
+                    <select name="priority" id="priority" required
+                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM" selected>Medium</option>
+                        <option value="HIGH">High</option>
+                    </select>
+                </div>
+
+                <!-- Is Event Checkbox -->
+                <div class="space-y-2">
+                    <div class="flex items-center">
+                        <input type="checkbox" name="is_event" id="is_event"
+                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <label for="is_event" class="ml-2 text-sm text-gray-700">This is an event</label>
+                    </div>
+                </div>
+
+                <!-- Event-specific fields (hidden by default) -->
+                <div id="eventFields" class="hidden space-y-4">
+                    <div class="space-y-2">
+                        <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+                        <input type="text" name="location" id="location"
+                               class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <div class="space-y-2">
+                        <label for="max_participants" class="block text-sm font-medium text-gray-700">
+                            Maximum Participants (0 for unlimited)
+                        </label>
+                        <input type="number" name="max_participants" id="max_participants" value="0" min="0"
+                               class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeCreateTaskModal()"
+                            class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600">
+                        Create Task/Event
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Detail Modal -->
+    <div id="taskDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 id="detailTaskTitle" class="text-xl font-semibold text-gray-900"></h3>
+                <button onclick="closeTaskDetailModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto">
+                <!-- Task Creator Info -->
+                <div class="flex items-center mb-6">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span id="detailCreatorInitial" class="text-blue-600 font-semibold"></span>
+                    </div>
+                    <div class="ml-3">
+                        <p id="detailCreatorName" class="text-gray-800 font-medium"></p>
+                        <p id="detailCreatedDate" class="text-sm text-gray-500"></p>
+                    </div>
+                </div>
+
+                <!-- Task Status and Priority -->
+                <div class="flex gap-4 mb-6">
+                    <span id="detailStatus" class="px-3 py-1 rounded-full text-sm"></span>
+                    <span id="detailPriority" class="px-3 py-1 rounded-full text-sm"></span>
+                </div>
+
+                <!-- Task Description -->
+                <div class="mb-6">
+                    <h4 class="text-gray-700 font-medium mb-2">Description</h4>
+                    <p id="detailDescription" class="text-gray-600"></p>
+                </div>
+
+                <!-- Due Date -->
+                <div class="mb-6">
+                    <h4 class="text-gray-700 font-medium mb-2">Due Date</h4>
+                    <div class="flex items-center text-gray-600">
+                        <i class="far fa-calendar mr-2"></i>
+                        <span id="detailDueDate"></span>
+                    </div>
+                </div>
+
+                <!-- Event Details (if is_event) -->
+                <div id="detailEventSection" class="mb-6 hidden">
+                    <h4 class="text-gray-700 font-medium mb-2">Event Details</h4>
+                    <div class="space-y-2">
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            <span id="detailLocation"></span>
+                        </div>
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-users mr-2"></i>
+                            <span id="detailParticipants"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end gap-3 mt-6 pt-6 border-t">
+                    <div id="detailEventButtons" class="hidden">
+                        <!-- Join/Leave buttons will be inserted here by JavaScript -->
+                    </div>
+                    {% if user.is_staff %}
+                    <button id="detailEditButton" onclick="editTask(currentTaskId)" 
+                            class="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg">
+                        Edit Task
+                    </button>
+                    <button id="detailDeleteButton" onclick="deleteTask(currentTaskId)"
+                            class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg">
+                        Delete Task
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add this function at the top
+        function getCsrfToken() {
+            const cookieName = 'csrftoken';
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, cookieName.length + 1) === (cookieName + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(cookieName.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue || document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+    
+    </script>
+
+    <script>
+
+        
+      
+
+        // Close modal when clicking outside
+        document.getElementById('createTaskModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCreateTaskModal();
+            }
+        });
+
+        // Update task status
+        function updateTaskStatus(taskId, status) {
+            fetch(`/task/${taskId}/update-status/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+                body: JSON.stringify({ status: status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.reload();
+                } else {
+                    alert('Error updating task status. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating task status. Please try again.');
+            });
+        }
+
+        // Update assignment status
+        function updateAssignmentStatus(taskId, status) {
+            fetch(`/task/${taskId}/update-assignment/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+                body: JSON.stringify({ status: status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.reload();
+                } else {
+                    alert('Error updating assignment status. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating assignment status. Please try again.');
+            });
+        }
+
+        // Handle event checkbox toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const isEventCheckbox = document.getElementById('id_is_event');
+            const locationField = document.querySelector('[name="location"]').closest('.space-y-2');
+            const maxParticipantsField = document.querySelector('[name="max_participants"]').closest('.space-y-2');
+
+            function toggleEventFields() {
+                if (isEventCheckbox.checked) {
+                    locationField.style.display = 'block';
+                    maxParticipantsField.style.display = 'block';
+                } else {
+                    locationField.style.display = 'none';
+                    maxParticipantsField.style.display = 'none';
+                }
+            }
+
+            if (isEventCheckbox) {
+                toggleEventFields(); // Initial state
+                isEventCheckbox.addEventListener('change', toggleEventFields);
+            }
+        });
+
+        // Message handling
+        {% if messages %}
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in messages %}
+            showNotification("{{ message }}", "{{ message.tags }}");
+            {% endfor %}
+        });
+        {% endif %}
+
+       
+        // Update unread count (same as in ResourceHub)
+        function updateNavUnreadCount() {
+            fetch('/chat/unread-count/')
+                .then(response => response.json())
+                .then(data => {
+                    const unreadBadge = document.getElementById('nav-unread-count');
+                    if (unreadBadge) {
+                        if (data.unread_count > 0) {
+                            unreadBadge.textContent = data.unread_count;
+                            unreadBadge.classList.remove('hidden');
+                        } else {
+                            unreadBadge.classList.add('hidden');
+                        }
+                    }
+                })
+                .catch(error => console.error('Error updating unread count:', error));
+        }
+        
+        // Start polling when document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavUnreadCount(); // Initial update
+            setInterval(updateNavUnreadCount, 5000);
+        });
+    </script>
+
+    <script>
+        function openCreateTaskModal() {
+            document.getElementById('createTaskModal').classList.remove('hidden');
+            // Set default date and time
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            // Format date as YYYY-MM-DD
+            const formattedDate = tomorrow.toISOString().split('T')[0];
+            document.getElementById('due_date').value = formattedDate;
+            
+            // Set default time to 12:00
+            document.getElementById('due_time').value = '12:00';
+        }
+    
+        function closeCreateTaskModal() {
+            document.getElementById('createTaskModal').classList.add('hidden');
+            // Reset form
+            document.querySelector('#createTaskModal form').reset();
+        }
+    
+         // Handle event checkbox toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        const isEventCheckbox = document.getElementById('is_event');
+        const eventFields = document.getElementById('eventFields');
+
+        function toggleEventFields() {
+            eventFields.classList.toggle('hidden', !isEventCheckbox.checked);
+        }
+
+        isEventCheckbox.addEventListener('change', toggleEventFields);
+
+        // Form submission handling
+        const form = document.querySelector('#createTaskModal form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Combine date and time
+            const date = document.getElementById('due_date').value;
+            const time = document.getElementById('due_time').value;
+            
+            if (!date || !time) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            // Create FormData object
+            const formData = new FormData(this);
+
+            // Add the combined datetime
+            formData.set('due_date', `${date}T${time}`);
+
+            // Send the form
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                // Handle redirect
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return null;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data === null) {
+                    // Redirect was handled above
+                    return;
+                }
+                if (data.status === 'success') {
+                    showNotification('Task created successfully!', 'success');
+                    closeCreateTaskModal();
+                    window.location.reload();
+                } else {
+                    showNotification(data.message || 'Error creating task', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error creating task. Please try again.', 'error');
+                window.location.reload(); // Reload on error to refresh the CSRF token
+            });
+        });
+    });
+    
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+            type === 'success' ? 'bg-green-500' :
+            type === 'error' ? 'bg-red-500' :
+            'bg-blue-500'
+        } text-white`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+    }
+    </script>
+
+    <script>
+        let currentTaskId = null;
+    
+        function openTaskDetail(taskId) {
+            currentTaskId = taskId;
+            const modal = document.getElementById('taskDetailModal');
+            
+            // Show loading state
+            document.getElementById('detailTaskTitle').textContent = 'Loading...';
+            modal.classList.remove('hidden');
+    
+            // Fetch task details
+            fetch(`/task/${taskId}/detail/`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update modal content
+                document.getElementById('detailTaskTitle').textContent = data.title;
+                document.getElementById('detailCreatorInitial').textContent = data.created_by.firstname[0];
+                document.getElementById('detailCreatorName').textContent = 
+                    `${data.created_by.firstname} ${data.created_by.lastname}`;
+                document.getElementById('detailCreatedDate').textContent = 
+                    new Date(data.created_date).toLocaleDateString();
+                
+                // Status badge
+                const statusBadge = document.getElementById('detailStatus');
+                statusBadge.textContent = data.status;
+                statusBadge.className = `px-3 py-1 rounded-full text-sm ${
+                    data.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                    data.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
+                    data.status === 'CANCELLED' ? 'bg-gray-100 text-gray-800' :
+                    'bg-yellow-100 text-yellow-800'
+                }`;
+    
+                // Priority badge
+                const priorityBadge = document.getElementById('detailPriority');
+                priorityBadge.textContent = data.priority;
+                priorityBadge.className = `px-3 py-1 rounded-full text-sm ${
+                    data.priority === 'HIGH' ? 'bg-red-100 text-red-800' :
+                    data.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-green-100 text-green-800'
+                }`;
+    
+                document.getElementById('detailDescription').textContent = data.description;
+                document.getElementById('detailDueDate').textContent = 
+                    new Date(data.due_date).toLocaleString();
+    
+                // Handle event-specific details
+                const eventSection = document.getElementById('detailEventSection');
+                const eventButtons = document.getElementById('detailEventButtons');
+                if (data.is_event) {
+                    document.getElementById('detailLocation').textContent = data.location || 'No location specified';
+                    document.getElementById('detailParticipants').textContent = 
+                        `${data.participants_count} participants ${data.max_participants > 0 ? 
+                        '/ ' + data.max_participants + ' max' : ''}`;
+                    eventSection.classList.remove('hidden');
+                    
+                    // Update event buttons with disabled state handling
+                    eventButtons.classList.remove('hidden');
+                    const buttonHtml = data.is_participant ?
+                        `<button onclick="leaveTask(${taskId})" 
+                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                            id="eventActionButton">
+                            Leave Event
+                        </button>` :
+                        `<button onclick="joinTask(${taskId})"
+                            class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                            id="eventActionButton"
+                            ${data.max_participants > 0 && data.participants_count >= data.max_participants ? 'disabled' : ''}>
+                            Join Event
+                        </button>`;
+                    eventButtons.innerHTML = buttonHtml;
+                } else {
+                    eventSection.classList.add('hidden');
+                    eventButtons.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error loading task details', 'error');
+                closeTaskDetailModal();
+            });
+        }
+    
+        function closeTaskDetailModal() {
+            document.getElementById('taskDetailModal').classList.add('hidden');
+            currentTaskId = null;
+        }
+    
+        // Close modal when clicking outside
+        document.getElementById('taskDetailModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTaskDetailModal();
+            }
+        });
+    </script>
+    <script>
+        function joinTask(taskId) {
+            const isInModal = !document.getElementById('taskDetailModal').classList.contains('hidden');
+            
+            fetch(`/task/${taskId}/join/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showNotification('Successfully joined the event!', 'success');
+                    // Wait 2 seconds before reloading
+                    setTimeout(() => {
+                        if (isInModal) {
+                            openTaskDetail(taskId);
+                        } else {
+                            window.location.reload();
+                        }
+                    }, 500); // 2 second delay
+                } else {
+                    showNotification(data.message || 'Error joining event', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error joining event. Please try again.', 'error');
+            });
+        }
+    
+        function leaveTask(taskId) {
+            const isInModal = !document.getElementById('taskDetailModal').classList.contains('hidden');
+            const currentUrl = window.location.href;
+            const isMyTasksView = currentUrl.includes('filter=assigned');
+            
+            fetch(`/task/${taskId}/leave/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    showNotification('Successfully left the event!', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/task/?filter=assigned';
+                    }, 2000); // 2 second delay
+                    return { status: 'success' };
+                }
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    showNotification('Successfully left the event!', 'success');
+                    // Wait 2 seconds before reloading
+                    setTimeout(() => {
+                        if (isInModal) {
+                            openTaskDetail(taskId);
+                        } else if (isMyTasksView) {
+                            window.location.href = '/task/?filter=assigned';
+                        } else {
+                            window.location.reload();
+                        }
+                    }, 500); // 2 second delay
+                } else {
+                    showNotification(data.message || 'Error leaving event', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error leaving event. Please try again.', 'error');
+                if (isMyTasksView) {
+                    setTimeout(() => {
+                        window.location.href = '/task/?filter=assigned';
+                    }, 500); // 2 second delay
+                }
+            });
+        }
+
+        function toggleEventButtons(disabled = true) {
+            const buttons = document.querySelectorAll('button[onclick*="joinTask"], button[onclick*="leaveTask"]');
+            buttons.forEach(button => {
+                button.disabled = disabled;
+            });
+        }
+        </script>
+</body>
+</html>
