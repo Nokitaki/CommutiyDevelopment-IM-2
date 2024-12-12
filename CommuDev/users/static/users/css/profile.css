@@ -78,27 +78,7 @@
     stroke: white;
 }
 
-.follow-button {
-    background-color: white;
-    color: var(--text-dark);
-    padding: 10px 24px;
-    border-radius: 25px;
-    border: 1px solid #e0e0e0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
-    font-size: 0.95rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-}
 
-.follow-button:hover {
-    background-color: #f8f8f8;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-}
 
 .profile-info {
     text-align: center;
@@ -190,10 +170,7 @@
     gap: 5px;
 }
 
-.rating {
-    color: #ffc107;
-    font-size: 20px;
-}
+
 
 .home-button {
     background-color: var(--primary-turquoise);
@@ -222,10 +199,7 @@
         margin-top: 20px;
     }
     
-    .edit-button, .follow-button {
-        padding: 8px 20px;
-        font-size: 0.9rem;
-    }
+    
 
     .profile-stats {
         grid-template-columns: 1fr;
@@ -668,21 +642,9 @@ opacity: 1;
     gap: 10px;
 }
 
-.follow-button, .edit-button {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: background 0.3s ease;
-}
 
-.follow-button:hover, .edit-button:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
+
+
 
 .profile-info {
     margin-top: 100px;
@@ -716,10 +678,7 @@ opacity: 1;
     border-bottom: 1px solid #e5e7eb;
 }
 
-.rating {
-    color: #fbbf24;
-    font-size: 1.2rem;
-}
+
 
 .action-buttons {
 display: flex;
@@ -837,16 +796,7 @@ transition: background-color 0.3s ease;
 background-color: #f3f4f6;
 }
 
-.biography-text {
-line-height: 1.6;
-word-wrap: break-word;
-max-width: 100%;
-display: -webkit-box;
--webkit-line-clamp: 3;
--webkit-box-orient: vertical;
-overflow: hidden;
-text-overflow: ellipsis;
-}
+
 
 .language-tags {
 display: flex;
@@ -918,6 +868,48 @@ background-color: #ef4444;
 box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
 }
 
+
+.profile-banner {
+    height: 200px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.banner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner-picture-preview {
+    width: 100%;
+    height: 150px;
+    margin: 0 auto 20px;
+    overflow: hidden;
+    position: relative;
+    border: 3px solid #e2e8f0;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.banner-picture-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner-picture-preview:hover::after {
+    content: 'Change Banner';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    text-align: center;
+    padding: 10px;
+}
 
 
 

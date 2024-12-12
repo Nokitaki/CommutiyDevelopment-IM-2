@@ -63,6 +63,7 @@ class UserProfileEditForm(forms.ModelForm):
             'profile_picture': forms.FileInput(attrs={
                 'class': 'form-control-file'
             }),
+            
 
              'languages': forms.TextInput(attrs={
                 'class': 'form-control',
