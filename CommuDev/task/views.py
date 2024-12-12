@@ -191,3 +191,32 @@ def update_assignment_status(request, task_id):
             assignment.save()
             return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'error'})
+
+@login_required
+@user_passes_test(is_staff_check)
+def edit_task(request, task_id):
+    task = get_object_or_404(Task, task_id=task_id)
+    
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'status': 'success'})
+        return JsonResponse({'status': 'error', 'errors': form.errors})
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    })
+    
+@login_required
+@user_passes_test(is_staff_check)
+def delete_task(request, task_id):
+    if request.method == 'POST':
+        task = get_object_or_404(Task, task_id=task_id)
+        task.delete()
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    })
